@@ -1,4 +1,4 @@
-/* Type translation for rtc operations
+/* MIG type translation information
 
    Copyright (C) 2024 Free Software Foundation, Inc.
 
