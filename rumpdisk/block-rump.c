@@ -182,11 +182,14 @@ rumpdisk_device_init (void)
 	{
 	  device_close (device);
 	  mach_port_deallocate (mach_task_self (), device);
+	  mach_port_deallocate (mach_task_self (), device_master);
 	  fprintf(stderr, "Kernel is already driving a SATA device, skipping probing " RUMP_TYPE_STRING " disks\n");
 	  fflush(stderr);
 	  disabled = 1;
 	  return;
 	}
+
+      mach_port_deallocate (mach_task_self (), device_master);
     }
   rump_init ();
 }

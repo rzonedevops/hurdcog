@@ -119,7 +119,10 @@ ds_device_open (mach_port_t open_port, mach_port_t reply_port,
     {
       err = get_privileged_ports(NULL, &dev_master);
       if (!err)
-        err = device_open (dev_master, mode, name, devp);
+	{
+	  err = device_open (dev_master, mode, name, devp);
+	  mach_port_deallocate (mach_task_self (), dev_master);
+	}
       if (!err)
         *devicePoly = MACH_MSG_TYPE_MOVE_SEND;
     }

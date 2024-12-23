@@ -37,6 +37,7 @@ get_console (void)
     return MACH_PORT_NULL;
 
   err = device_open (device_master, D_WRITE | D_READ, "console", &console);
+  mach_port_deallocate (mach_task_self (), device_master);
   if (err)
     return MACH_PORT_NULL;
 

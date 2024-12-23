@@ -80,6 +80,7 @@ pci_device_open (mach_port_t reply_port, mach_msg_type_name_t reply_port_type,
       if (dev_master == MACH_PORT_NULL)
         return D_NO_SUCH_DEVICE;
       err = device_open (dev_master, mode, name, devp);
+      mach_port_deallocate (mach_task_self (), dev_master);
       if (err)
         return err;
       *devicePoly = MACH_MSG_TYPE_MOVE_SEND;
