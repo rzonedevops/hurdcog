@@ -73,6 +73,7 @@ S_acpi_get_pci_irq (struct protid *master,
 		    int *irq)
 {
   error_t err;
+  int ret;
 
   if (!master)
     return EOPNOTSUPP;
@@ -81,6 +82,10 @@ S_acpi_get_pci_irq (struct protid *master,
   if (err)
     return err;
 
-  *irq = acpi_get_irq_number(bus, dev, func);
-  return err;
+  ret = acpi_get_irq_number(bus, dev, func);
+  if (ret < 0)
+    return -EIO;
+
+  *irq = ret;
+  return 0;
 }
