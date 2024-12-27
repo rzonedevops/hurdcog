@@ -53,6 +53,8 @@ static mach_port_t irqdev = MACH_PORT_NULL;
 static mach_port_t acpidev = MACH_PORT_NULL;
 static bool acpi_missing = false;
 
+extern char *netfs_server_name __attribute__ ((weak));
+
 static error_t
 get_acpi(void)
 {
@@ -70,6 +72,11 @@ get_acpi(void)
 	  return 0;
 	}
     }
+
+  /* *We* are acpi.  */
+  if (&netfs_server_name && netfs_server_name &&
+      strcmp (netfs_server_name, "acpi") == 0)
+    return ENODEV;
 
   tryacpi = file_name_lookup (_SERVERS_ACPI, O_RDONLY, 0);
   if (tryacpi == MACH_PORT_NULL)
