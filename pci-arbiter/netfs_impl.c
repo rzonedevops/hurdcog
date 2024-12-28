@@ -577,6 +577,7 @@ get_filemap_region (struct node *node, vm_prot_t prot)
   vm_prot_t max_prot;
   size_t reg_num;
   struct pci_mem_region *region;
+  size_t rounded_size;
 
   /* Get region info */
   reg_num =
@@ -592,12 +593,17 @@ get_filemap_region (struct node *node, vm_prot_t prot)
   if (err)
     goto error;
 
+  /* WARNING: this rounds up the proxied region to a whole page.
+   * This may be a security risk, but is the only way to provide access
+   * to the final page of the memory region */
+  rounded_size = round_page (region->size);
+
   /* Create a new memory object proxy with the required protection */
   max_prot = (VM_PROT_READ | VM_PROT_WRITE) & prot;
   err =
     vm_region_create_proxy (mach_task_self (),
 			    (vm_address_t) node->nn->ln->region_maps[reg_num],
-			    max_prot, region->size, &proxy);
+			    max_prot, rounded_size, &proxy);
   if (err)
     goto error;
 
