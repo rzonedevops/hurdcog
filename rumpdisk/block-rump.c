@@ -376,6 +376,7 @@ rumpdisk_device_write (void *d, mach_port_t reply_port,
 
       if (written < 0)
 	{
+	  vm_deallocate (mach_task_self (), (vm_address_t) data, count);
 	  pthread_rwlock_unlock (&rumpdisk_rwlock);
 	  return rump_errno2host (err);
 	}
@@ -405,6 +406,7 @@ rumpdisk_device_write (void *d, mach_port_t reply_port,
 
 	  if (done < 0)
 	    {
+	      vm_deallocate (mach_task_self (), (vm_address_t) data, count);
 	      pthread_rwlock_unlock (&rumpdisk_rwlock);
 	      return rump_errno2host (errno);
 	    }
