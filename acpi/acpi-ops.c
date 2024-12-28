@@ -84,7 +84,7 @@ S_acpi_get_pci_irq (struct protid *master,
 
   ret = acpi_get_irq_number(bus, dev, func);
   if (ret < 0)
-    return -EIO;
+    return EIO;
 
   *irq = ret;
   return 0;
