@@ -230,9 +230,7 @@ close_hook (struct trivfs_peropen *po)
 
   if (was_active)
     /* See if PIPE should cease to be the user-visible face of this fifo.  */
-    detach =
-      ((flags & O_READ) && pipe->readers == 1)
-	|| ((flags & O_WRITE) && pipe->writers == 1);
+    detach = ((flags & O_READ) && pipe->readers == 1);
   else
     /* Let others have their fun.  */
     pthread_mutex_unlock (&active_fifo_lock);
