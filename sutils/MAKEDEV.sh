@@ -131,6 +131,8 @@ mkdev() {
 	   ${DEVDIR}/vcs/`echo $I | sed -e s/tty//`/console;;
       lpr[0-9])
         st $I root 660 c /hurd/streamio "$I";;
+      rtc)
+	st $I root 644 c /hurd/rtc;;
       random)
 	st $I root 644 c /hurd/random --seed-file /var/lib/random-seed;;
       urandom)
