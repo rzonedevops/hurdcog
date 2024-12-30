@@ -728,7 +728,6 @@ parse_opt (int key, char *arg, struct argp_state *state)
     case OPT_KERNEL_TASK:
       kernel_task = atoi (arg);
       break;
-    default: return ARGP_ERR_UNKNOWN;
     }
   return 0;
 }
