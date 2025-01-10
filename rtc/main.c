@@ -36,7 +36,7 @@ static struct trivfs_control *rtccntl;
 
 int trivfs_fstype = FSTYPE_DEV;
 int trivfs_fsid = 0;
-int trivfs_support_read = 1;
+int trivfs_support_read = 0;
 int trivfs_support_write = 0;
 int trivfs_support_exec = 0;
 int trivfs_allow_open = O_READ | O_WRITE;
