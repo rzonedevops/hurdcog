@@ -965,7 +965,10 @@ diskfs_get_directs (struct node *dp,
     allocsize = round_page (bufsiz);
 
   if (allocsize > *datacnt)
-    *data = mmap (0, allocsize, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+    {
+      *data = mmap (0, allocsize, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+      assert_backtrace (*data != MAP_FAILED);
+    }
 
   /* Set bufp appropriately */
   bufp = buf;

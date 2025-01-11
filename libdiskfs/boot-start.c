@@ -374,14 +374,20 @@ diskfs_S_exec_startup_get_info (struct bootinfo *upt,
   *flags = EXEC_STACK_ARGS;
 
   if (*portarraylen < INIT_PORT_MAX)
-    *portarrayP = mmap (0, INIT_PORT_MAX * sizeof (mach_port_t),
-			PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+    {
+      *portarrayP = mmap (0, INIT_PORT_MAX * sizeof (mach_port_t),
+			  PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+      assert_backtrace (*portarrayP != MAP_FAILED);
+    }
   portarray = *portarrayP;
   *portarraylen = INIT_PORT_MAX;
 
   if (*dtablelen < 3)
-    *dtableP = mmap (0, 3 * sizeof (mach_port_t), PROT_READ|PROT_WRITE,
-		     MAP_ANON, 0, 0);
+    {
+      *dtableP = mmap (0, 3 * sizeof (mach_port_t), PROT_READ|PROT_WRITE,
+		       MAP_ANON, 0, 0);
+      assert_backtrace (*dtableP != MAP_FAILED);
+    }
   dtable = *dtableP;
   *dtablelen = 3;
   dtable[0] = dtable[1] = dtable[2] = get_console (); /* XXX */
@@ -627,6 +633,7 @@ diskfs_S_fsys_init (struct diskfs_control *pt,
       unsigned int i;
       portarray = mmap (0, INIT_PORT_MAX * sizeof *portarray,
 			PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+      assert_backtrace (portarray != MAP_FAILED);
       if (MACH_PORT_NULL != (mach_port_t) 0)
 	for (i = 0; i < INIT_PORT_MAX; ++i)
 	  portarray[i] = MACH_PORT_NULL;

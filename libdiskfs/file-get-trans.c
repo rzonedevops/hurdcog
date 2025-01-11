@@ -45,7 +45,10 @@ diskfs_S_file_get_translator (struct protid *cred,
       if (!err)
 	{
 	  if (len > *translen)
-	    *trans = mmap (0, len, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	    {
+	      *trans = mmap (0, len, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	      assert_backtrace (*trans != MAP_FAILED);
+	    }
 	  memcpy (*trans, string, len);
 	  *translen = len;
 	  free (string);
@@ -58,7 +61,10 @@ diskfs_S_file_get_translator (struct protid *cred,
       mach_msg_type_number_t amt;
       assert_backtrace (diskfs_shortcut_symlink);
       if (len > *translen)
-	*trans = mmap (0, len, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	{
+	  *trans = mmap (0, len, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	  assert_backtrace (*trans != MAP_FAILED);
+	}
       memcpy (*trans, _HURD_SYMLINK, sizeof _HURD_SYMLINK);
 
       if (diskfs_read_symlink_hook)
@@ -98,7 +104,10 @@ diskfs_S_file_get_translator (struct protid *cred,
       buflen++;			/* terminating nul */
 
       if (buflen > *translen)
-	*trans = mmap (0, buflen, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	{
+	  *trans = mmap (0, buflen, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	  assert_backtrace (*trans != MAP_FAILED);
+	}
       memcpy (*trans, buf, buflen);
       free (buf);
       *translen = buflen;
@@ -110,7 +119,10 @@ diskfs_S_file_get_translator (struct protid *cred,
 
       len = sizeof _HURD_FIFO;
       if (len > *translen)
-	*trans = mmap (0, len, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	{
+	  *trans = mmap (0, len, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	  assert_backtrace (*trans != MAP_FAILED);
+	}
       memcpy (*trans, _HURD_FIFO, sizeof _HURD_FIFO);
       *translen = len;
       err = 0;
@@ -121,7 +133,10 @@ diskfs_S_file_get_translator (struct protid *cred,
 
       len = sizeof _HURD_IFSOCK;
       if (len > *translen)
-	*trans = mmap (0, len, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	{
+	  *trans = mmap (0, len, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	  assert_backtrace (*trans != MAP_FAILED);
+	}
       memcpy (*trans, _HURD_IFSOCK, sizeof _HURD_IFSOCK);
       *translen = len;
       err = 0;

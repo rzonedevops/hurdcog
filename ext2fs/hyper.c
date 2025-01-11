@@ -46,7 +46,7 @@ allocate_mod_map (void)
       mod_map_size = le32toh (sblock->s_blocks_count) >> 3;
       modified_global_blocks = mmap (0, mod_map_size, PROT_READ|PROT_WRITE,
 				     MAP_ANON, 0, 0);
-      assert_backtrace (modified_global_blocks != (void *) -1);
+      assert_backtrace (modified_global_blocks != MAP_FAILED);
     }
   else
     modified_global_blocks = 0;

@@ -45,8 +45,11 @@ diskfs_S_file_getfh (struct protid *cred, data_t *fh,
   pthread_mutex_lock (&node->lock);
 
   if (*fh_len < sizeof (union diskfs_fhandle))
-    *fh = mmap (0, sizeof (union diskfs_fhandle), PROT_READ|PROT_WRITE,
-		MAP_ANON, 0, 0);
+    {
+      *fh = mmap (0, sizeof (union diskfs_fhandle), PROT_READ|PROT_WRITE,
+		  MAP_ANON, 0, 0);
+      assert_backtrace (*fh != MAP_FAILED);
+    }
   *fh_len = sizeof *f;
 
   f = (union diskfs_fhandle *) *fh;
