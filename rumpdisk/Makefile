@@ -17,7 +17,7 @@
 
 RUMPLIBS=rump rumpuser rumpdev rumpdev_disk rumpdev_pci rumpvfs
 RUMPSATA=rumpdev_ahcisata rumpdev_piixide rumpdev_ata
-RUMPUSB=rumpdev_usb rumpdev_pci_usbhc rumpdev_umass
+RUMPUSB=rumpdev_usb rumpdev_pci_usbhc rumpdev_umass rumpdev_scsipi
 RUMPEXTRA=rumpdev_scsipi
 
 # If we have a configured tree, include the configuration so that we
