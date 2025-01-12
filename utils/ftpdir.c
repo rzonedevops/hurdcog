@@ -43,7 +43,7 @@ static struct argp_option options[] =
                               " occurrences of %s are replace by HOST and DIR"},
   {"host",     'h', "HOST",0, "Use HOST as a default host"},
   {"debug",    'D', 0,     0, "Turn on debugging output for ftp connections"},
-  {"intepret", 'i', 0,     0, "Parse the directory output"},
+  {"interpret",'i', 0,     0, "Parse the directory output"},
   {0, 0}
 };
 static char *args_doc = "[([HOST:]DIR | HOST:)...]";
