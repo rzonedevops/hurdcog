@@ -801,25 +801,25 @@ cpuinfo_x86 (void* hook, char **contents, ssize_t *contents_len)
     vendor, family, model, model_name, stepping);
 
   fprintf (m, "flags\t\t:");
-  for (index = 0; index < (sizeof(cpu_features_edx)/sizeof(char*)); index++)
+  for (index = 0; index < (sizeof (cpu_features_edx)/sizeof (char*)); index++)
     {
       if (cpu_features_edx[index] == NULL)
         continue;
       if (feature_edx & (1ul << index))
-        fprintf(m, " %s", cpu_features_edx[index]);
+        fprintf (m, " %s", cpu_features_edx[index]);
     }
-  for (index = 0; index < (sizeof(cpu_features_ecx)/sizeof(char*)); index++)
+  for (index = 0; index < (sizeof (cpu_features_ecx)/sizeof (char*)); index++)
     {
       if (cpu_features_ecx[index] == NULL)
         continue;
       if (feature_ecx & (1ul << index))
-        fprintf(m, " %s", cpu_features_ecx[index]);
+        fprintf (m, " %s", cpu_features_ecx[index]);
     }
 
-  fprintf(m, "\n\n");
+  fprintf (m, "\n\n");
 
 out:
-  fclose(m);
+  fclose (m);
   return err;
 }
 #endif
@@ -858,7 +858,7 @@ cpuinfo_aarch64 (void *hook, char **contents, ssize_t *contents_len)
   if (m == NULL)
     return errno;
 
-  err = aarch64_get_hwcaps (mach_host_self(), &caps, &midr, &revidr);
+  err = aarch64_get_hwcaps (mach_host_self (), &caps, &midr, &revidr);
   if (err)
     goto out;
 
@@ -868,31 +868,31 @@ cpuinfo_aarch64 (void *hook, char **contents, ssize_t *contents_len)
   part_num     = (midr & 0x0000fff0) >>  4;
   revision     = (midr & 0x0000000f) >>  0;
 
-  fprintf(m, "processor\t\t: 0\n");
-  fprintf(m, "Features\t\t:");
+  fprintf (m, "processor\t\t: 0\n");
+  fprintf (m, "Features\t\t:");
   for (index = 0; index < (sizeof (cpu_features_1) / sizeof (char *)); index++)
     {
       if (cpu_features_1[index] == NULL)
         continue;
       if (caps[0] & (1ul << index))
-        fprintf(m, " %s", cpu_features_1[index]);
+        fprintf (m, " %s", cpu_features_1[index]);
     }
-  for (index = 0; index < (sizeof(cpu_features_2) / sizeof(char *)); index++)
+  for (index = 0; index < (sizeof (cpu_features_2) / sizeof (char *)); index++)
     {
       if (cpu_features_2[index] == NULL)
         continue;
       if (caps[1] & (1ul << index))
-        fprintf(m, " %s", cpu_features_2[index]);
+        fprintf (m, " %s", cpu_features_2[index]);
     }
-  fprintf(m, "\n");
-  fprintf(m, "CPU implementer\t\t: 0x%x\n", implementer);
-  fprintf(m, "CPU architecture\t: %d\n", architecture);
-  fprintf(m, "CPU variant\t\t: 0x%x\n", variant);
-  fprintf(m, "CPU part\t\t: 0x%x\n", part_num);
-  fprintf(m, "CPU revision\t\t: %d\n", revision);
-  fprintf(m, "\n");
+  fprintf (m, "\n");
+  fprintf (m, "CPU implementer\t\t: 0x%x\n", implementer);
+  fprintf (m, "CPU architecture\t: %d\n", architecture);
+  fprintf (m, "CPU variant\t\t: 0x%x\n", variant);
+  fprintf (m, "CPU part\t\t: 0x%x\n", part_num);
+  fprintf (m, "CPU revision\t\t: %d\n", revision);
+  fprintf (m, "\n");
 out:
-  fclose(m);
+  fclose (m);
   return err;
 }
 #endif
@@ -901,9 +901,9 @@ static error_t
 rootdir_gc_cpuinfo (void *hook, char **contents, ssize_t *contents_len)
 {
 #if defined (__x86_64__) || defined (__i486__) || defined (__i586__) || defined (__i686__)
-  return cpuinfo_x86(hook, contents, contents_len);
+  return cpuinfo_x86 (hook, contents, contents_len);
 #elif defined (__aarch64__)
-  return cpuinfo_aarch64(hook, contents, contents_len);
+  return cpuinfo_aarch64 (hook, contents, contents_len);
 #else
   return ENOTSUP;
 #endif
