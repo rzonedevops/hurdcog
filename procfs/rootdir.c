@@ -38,6 +38,12 @@
 #include "procfs_dir.h"
 #include "main.h"
 #include <net/route.h>
+#if defined (__x86_64__) || defined (__i486__) || defined (__i586__) || defined (__i686__)
+#include <cpuid.h>
+#elif defined (__aarch64__)
+#warning Aarch64 port of cpuinfo is untested
+#include <mach/machine/mach_aarch64.h>
+#endif
 
 #include "mach_debug_U.h"
 #include "pfinet_U.h"
@@ -696,6 +702,212 @@ out_fclose:
   fclose (m);
   return err;
 }
+
+#if defined (__x86_64__) || defined (__i486__) || defined (__i586__) || defined (__i686__)
+static char *cpu_features_edx[] =
+  {
+    "fpu", "vme", "de", "pse", "tsc", "msr", "pae", "mce", "cx8", "apic",
+    NULL, "sep", "mtrr", "pge", "mca", "cmov", "pat", "pse36", "pn", "clflush",
+    NULL, "dts", "acpi", "mmx", "fxsr", "sse", "sse2", "ss", "ht", "tm",
+    "ia64", "pbe"
+  };
+
+static char *cpu_features_ecx[] =
+  {
+    "sse3", "pclmulqdq", "dtes64", "monitor", "ds_cpl", "vmx", "smx", "est",
+    "tm2", "ssse3", "cid", "sdbg", "fma", "cx16", "xtpr", "pdcm",
+    NULL, "pcid", "dca", "sse4_1", "sse4_2", "x2apic", "movbe", "popcnt",
+    "tsc_deadline_timer", "aes", "xsave", "osxsave", "avx", "f16c", "rdrand", "hypervisor"
+  };
+
+#define VENDOR_ID_LEN  12
+#define MODEL_NAME_LEN 48
+
+static error_t
+cpuinfo_x86 (void* hook, char **contents, ssize_t *contents_len)
+{
+  error_t err = 0;
+  FILE* m;
+  int ret, index, stepping, model, family, extended_model, extended_family;
+  unsigned int eax, ebx, ecx, edx;
+  unsigned int feature_edx, feature_ecx;
+  char vendor[VENDOR_ID_LEN + 1] = { 0 };
+  char model_name[MODEL_NAME_LEN + 1] = { 0 };
+
+  m = open_memstream (contents, (size_t *) contents_len);
+  if (m == NULL)
+    return errno;
+
+  ret = __get_cpuid (0, &eax, &ebx, &ecx, &edx);
+  if (ret != 1)
+    {
+      err = EIO;
+      goto out;
+    }
+
+  memcpy (vendor + 0 * sizeof (unsigned int), &ebx, sizeof (unsigned int));
+  memcpy (vendor + 1 * sizeof (unsigned int), &edx, sizeof (unsigned int));
+  memcpy (vendor + 2 * sizeof (unsigned int), &ecx, sizeof (unsigned int));
+
+  ret = __get_cpuid (1, &eax, &ebx, &ecx, &edx);
+  if (ret != 1)
+    {
+      err = EIO;
+      goto out;
+    }
+
+  feature_edx = edx;
+  feature_ecx = ecx;
+  stepping = eax & 0x0F;
+  model = (eax & 0xF0) >> 4;
+  family = (eax & 0xF00) >> 8;
+  extended_model = (eax & 0xF0000) >> 16;
+  extended_family = (eax &0xFF00000) >> 20;
+
+  if (family == 6 || family == 15)
+    model += (extended_model << 4);
+  if (family == 15)
+    family += extended_family;
+
+  __get_cpuid (0x80000000, &eax, &ebx, &ecx, &edx);
+  if (eax >= 0x80000004)
+    {
+      __get_cpuid (0x80000002, &eax, &ebx, &ecx, &edx);
+      memcpy (model_name + 0 * sizeof (unsigned int), &eax, sizeof (unsigned int));
+      memcpy (model_name + 1 * sizeof (unsigned int), &ebx, sizeof (unsigned int));
+      memcpy (model_name + 2 * sizeof (unsigned int), &ecx, sizeof (unsigned int));
+      memcpy (model_name + 3 * sizeof (unsigned int), &edx, sizeof (unsigned int));
+
+      __get_cpuid (0x80000003, &eax, &ebx, &ecx, &edx);
+      memcpy (model_name + 4 * sizeof (unsigned int), &eax, sizeof (unsigned int));
+      memcpy (model_name + 5 * sizeof (unsigned int), &ebx, sizeof (unsigned int));
+      memcpy (model_name + 6 * sizeof (unsigned int), &ecx, sizeof (unsigned int));
+      memcpy (model_name + 7 * sizeof (unsigned int), &edx, sizeof (unsigned int));
+
+      __get_cpuid (0x80000004, &eax, &ebx, &ecx, &edx);
+      memcpy (model_name + 8 * sizeof (unsigned int), &eax, sizeof (unsigned int));
+      memcpy (model_name + 9 * sizeof (unsigned int), &ebx, sizeof (unsigned int));
+      memcpy (model_name + 10 * sizeof (unsigned int), &ecx, sizeof (unsigned int));
+      memcpy (model_name + 11 * sizeof (unsigned int), &edx, sizeof (unsigned int));
+    }
+
+  fprintf (m,
+    "processor\t: 0\n"
+    "vendor_id\t: %s\n"
+    "cpu family\t: %d\n"
+    "model\t\t: %d\n"
+    "model name\t: %s\n"
+    "stepping\t: %d\n",
+    vendor, family, model, model_name, stepping);
+
+  fprintf (m, "flags\t\t:");
+  for (index = 0; index < (sizeof(cpu_features_edx)/sizeof(char*)); index++)
+    {
+      if (cpu_features_edx[index] == NULL)
+        continue;
+      if (feature_edx & (1ul << index))
+        fprintf(m, " %s", cpu_features_edx[index]);
+    }
+  for (index = 0; index < (sizeof(cpu_features_ecx)/sizeof(char*)); index++)
+    {
+      if (cpu_features_ecx[index] == NULL)
+        continue;
+      if (feature_ecx & (1ul << index))
+        fprintf(m, " %s", cpu_features_ecx[index]);
+    }
+
+  fprintf(m, "\n\n");
+
+out:
+  fclose(m);
+  return err;
+}
+#endif
+
+#if defined (__aarch64__)
+
+static char *cpu_features_1[] =
+  {
+    "fp", "asimd", "evtstrm", "aes", "pmul", "sha1", "sha2", "crc32",
+    "atomics", "fphp", "asimdhp", "cpuid", "asimdrdm", "jscvt", "fcma", "lrcpc",
+    "dcpop", "sha3", "sm3", "sm4", "asimddp", "sha512", "sve", "asimdfhm",
+    "dit", "uscat", "ilrcpc", "flagm", "ssbs", "sb", "paca", "pacg"
+  };
+
+static char *cpu_features_2[] =
+  {
+    "dcpodp", "sve2", "sveaes", "svepmull", "svebitperm", "svesha3", "svesm4", "flagm2",
+    "frint", "svei8mm", "svef32mm", "svef64mm", "svebf16", "i8mm", "bf16", "dgh",
+    "rng", "bti", "mie", "ecv", "afp", "rpres", "mte3", "sme",
+    "sme_i16i64", "sme_f64f64", "sme_i8i32", "sme_f16f32", "sme_b16f32", "sme_f32f32", "sme_fa64", "wfxt",
+    "ebf16", "sve_ebf16", "cssc", "rprfm", "sve2p1", "sme2", "sme2p1", "sme_i15i32",
+    "sme_bi32i32", "sme_b16b16", "sme_f16f16", "mops", "hbc", "sve_b16b16", "lrcpc3", "lse123"
+  };
+
+static error_t
+cpuinfo_aarch64 (void *hook, char **contents, ssize_t *contents_len)
+{
+  error_t err = 0;
+  hwcaps_t caps;
+  uint64_t midr, revidr;
+  int index;
+  unsigned int implementer, variant, architecture, part_num, revision;
+  FILE *m;
+
+  m = open_memstream (contents, (size_t *) contents_len);
+  if (m == NULL)
+    return errno;
+
+  err = aarch64_get_hwcaps (mach_host_self(), &caps, &midr, &revidr);
+  if (err)
+    goto out;
+
+  implementer  = (midr & 0xff000000) >> 24;
+  variant      = (midr & 0x00f00000) >> 20;
+  architecture = (midr & 0x000f0000) >> 16;
+  part_num     = (midr & 0x0000fff0) >>  4;
+  revision     = (midr & 0x0000000f) >>  0;
+
+  fprintf(m, "processor\t\t: 0\n");
+  fprintf(m, "Features\t\t:");
+  for (index = 0; index < (sizeof (cpu_features_1) / sizeof (char *)); index++)
+    {
+      if (cpu_features_1[index] == NULL)
+        continue;
+      if (caps[0] & (1ul << index))
+        fprintf(m, " %s", cpu_features_1[index]);
+    }
+  for (index = 0; index < (sizeof(cpu_features_2) / sizeof(char *)); index++)
+    {
+      if (cpu_features_2[index] == NULL)
+        continue;
+      if (caps[1] & (1ul << index))
+        fprintf(m, " %s", cpu_features_2[index]);
+    }
+  fprintf(m, "\n");
+  fprintf(m, "CPU implementer\t\t: 0x%x\n", implementer);
+  fprintf(m, "CPU architecture\t: %d\n", architecture);
+  fprintf(m, "CPU variant\t\t: 0x%x\n", variant);
+  fprintf(m, "CPU part\t\t: 0x%x\n", part_num);
+  fprintf(m, "CPU revision\t\t: %d\n", revision);
+  fprintf(m, "\n");
+out:
+  fclose(m);
+  return err;
+}
+#endif
+
+static error_t
+rootdir_gc_cpuinfo (void *hook, char **contents, ssize_t *contents_len)
+{
+#if defined (__x86_64__) || defined (__i486__) || defined (__i586__) || defined (__i686__)
+  return cpuinfo_x86(hook, contents, contents_len);
+#elif defined (__aarch64__)
+  return cpuinfo_aarch64(hook, contents, contents_len);
+#else
+  return ENOTSUP;
+#endif
+}
 
 /* Glue logic and entries table */
 
@@ -885,6 +1097,13 @@ static const struct procfs_dir_entry rootdir_entries[] = {
     .name = "swaps",
     .hook = & (struct procfs_node_ops) {
       .get_contents = rootdir_gc_swaps,
+      .cleanup_contents = procfs_cleanup_contents_with_free,
+    },
+  },
+  {
+    .name = "cpuinfo",
+    .hook = & (struct procfs_node_ops) {
+      .get_contents = rootdir_gc_cpuinfo,
       .cleanup_contents = procfs_cleanup_contents_with_free,
     },
   },
