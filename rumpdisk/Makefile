@@ -36,7 +36,7 @@ makemode := servers
 SRCS = main.c block-rump.c
 LCLHDRS = block-rump.h ioccom-rump.h
 targets = rumpdisk rumpusbdisk
-HURDLIBS = machdev ports trivfs shouldbeinlibc iohelp ihash fshelp
+HURDLIBS = machdev ports trivfs shouldbeinlibc iohelp ihash fshelp irqhelp
 LDLIBS += -lpthread -lpciaccess -ldl $(RUMPEXTRA:%=-l%_pic) \
 	  -Wl,--whole-archive $(RUMPLIBS:%=-l%_pic) -Wl,--no-whole-archive
 
