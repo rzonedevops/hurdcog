@@ -35,6 +35,9 @@ diskfs_S_io_write (struct protid *cred,
   if (!cred)
     return EOPNOTSUPP;
 
+  if (diskfs_check_readonly ())
+    return EROFS;
+
   np = cred->po->np;
   if (!(cred->po->openstat & O_WRITE))
     return EBADF;
