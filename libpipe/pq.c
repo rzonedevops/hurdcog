@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <sys/mman.h>
+#include <assert-backtrace.h>
 
 #include "pq.h"
 
