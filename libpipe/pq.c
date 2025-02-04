@@ -410,7 +410,13 @@ packet_fetch (struct packet *packet,
 	/* Just copy the data the old fashioned way....  */
 	{
 	  if (*data_len < amount)
-	    *data = mmap (0, amount, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	    {
+	      *data = mmap (0, amount, PROT_READ|PROT_WRITE, MAP_ANON, 0, 0);
+	      if (*data == MAP_FAILED)
+		assert_perror_backtrace (errno);
+	      else
+		assert_backtrace (*data);
+	    }
 
 	  memcpy (*data, start, amount);
 	  start += amount;
