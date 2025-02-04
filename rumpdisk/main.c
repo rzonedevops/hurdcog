@@ -99,13 +99,28 @@ static struct argp_child empty_argp_children[] = {{0}};
 static struct argp rumpdisk_argp = {options, parse_opt, 0, 0, empty_argp_children};
 static const struct argp *rumpdisk_argp_bootup = &rumpdisk_argp;
 
+static int __thread wired = 0;
+static int rumpdisk_demuxer (mach_msg_header_t *inp, mach_msg_header_t *outp)
+{
+  /* FIXME: we are not wired while receiving our first message.  */
+  if (!wired)
+    {
+      mach_port_t self = mach_thread_self ();
+      thread_wire (_hurd_host_priv, self, TRUE);
+      mach_port_deallocate (mach_task_self (), self);
+      wired = 1;
+    }
+
+  return machdev_demuxer (inp, outp);
+}
+
 static void *
 rumpdisk_multithread_server(void *arg)
 {
   do
     {
       ports_manage_port_operations_multithread (machdev_device_bucket,
-						machdev_demuxer,
+						rumpdisk_demuxer,
 						1000 * 60 * 2,  /* 2 minute thread */
 						1000 * 60 * 10, /* 10 minute server */
 						0);
@@ -140,7 +155,10 @@ main (int argc, char **argv)
      swapping.  */
   err = wire_task_self ();
   if (err)
-    error (1, errno, "cannot lock all memory");
+    error (1, err, "cannot lock all memory");
+  err = thread_wire (_hurd_host_priv, mach_thread_self (), TRUE);
+  if (err != KERN_SUCCESS)
+    error (1, err, "cannot get vm_privilege");
 
   machdev_device_init ();
   err = pthread_create (&t, NULL, rumpdisk_multithread_server, NULL);
