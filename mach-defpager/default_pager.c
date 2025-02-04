@@ -1647,8 +1647,14 @@ ddprintf ("default_read(%lx,%x,%lx,%d)\n",addr,size,offset,block.block.p_index);
 				       size,
 				       &raddr,
 				       &rsize);
-	    if (rc != 0)
+	    if (rc != 0) {
+		static int warned = 0;
+		if (!warned) {
+		    printf("(default pager): default_read got %s (%x)\n", strerror(rc), rc);
+		    warned = 1;
+		}
 		return (PAGER_ERROR);
+	    }
 
 	    /*
 	     * If we got the entire page on the first read, return it.
@@ -1708,8 +1714,14 @@ default_write(dpager_t	ds,
 	 * Find block in paging partition
 	 */
 	block = pager_write_offset(ds, offset);
-	if ( no_block(block) )
+	if ( no_block(block) ) {
+	    static int warned = 0;
+	    if (!warned) {
+		printf("(default pager): default_write got out of room\n");
+		warned = 1;
+	    }
 	    return (PAGER_ERROR);
+	}
 
 #ifdef	CHECKSUM
 	/*
@@ -1738,6 +1750,11 @@ ddprintf ("default_write(%lx,%x,%lx,%d)\n",addr,size,offset,block.block.p_index)
 					size,
 					&wsize);
 	    if (rc != 0) {
+		static int warned = 0;
+		if (!warned) {
+		    printf("(default pager): default_write got %s (%x)\n", strerror(rc), rc);
+		    warned = 1;
+		}
 		dprintf("*** PAGER ERROR: default_write: ");
 		dprintf("ds=0x%p addr=0x%lx size=0x%x offset=0x%lx resid=0x%x\n",
 			ds, addr, size, offset, wsize);
@@ -2453,6 +2470,11 @@ ddprintf ("seqnos_memory_object_data_request <%p>: pager_port_unlock: <%p>[s:%d,
 	pager_port_unlock(ds);
 
 	if (errors) {
+	    static int warned = 0;
+	    if (!warned) {
+		printf("(default pager): previous write error for object, killing it\n");
+		warned = 1;
+	    }
 	    dprintf("%s %s\n", my_name,
 		   "dropping data_request because of previous paging errors");
 	    (void) memory_object_data_error(reply_to,
@@ -2497,6 +2519,7 @@ ddprintf ("seqnos_memory_object_data_request <%p>: pager_port_unlock: <%p>[s:%d,
 		break;
 
 	    case PAGER_ERROR:
+		printf("(default pager): data_request read error, lost data\n");
 		(void) memory_object_data_error(
 			reply_to,
 			offset,
@@ -2553,7 +2576,11 @@ ddprintf ("seqnos_memory_object_data_initialize <%p>: pager_port_unlock: <%p>[s:
 				  vm_page_size,
 				  offset + amount_sent)
 			 != PAGER_SUCCESS) {
-		    dprintf("%s%s write error\n", my_name, here);
+		    static int warned = 0;
+		    if (!warned) {
+			warned = 1;
+			printf("(default pager): data_initialize write error, losing data\n");
+		    }
 		    dstruct_lock(ds);
 		    ds->errors++;
 		    dstruct_unlock(ds);
@@ -2636,6 +2663,11 @@ seqnos_memory_object_data_return(default_pager_t	ds,
 			      vm_page_size,
 			      offset + amount_sent);
 	    if (result != KERN_SUCCESS) {
+		static int warned = 0;
+		if (!warned) {
+		    printf("(default pager): data_return write error, losing data\n");
+		    warned = 1;
+		}
 		dstruct_lock(ds);
 		ds->errors++;
 		dstruct_unlock(ds);
