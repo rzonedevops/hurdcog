@@ -2470,6 +2470,9 @@ ddprintf ("seqnos_memory_object_data_request <%p>: pager_port_unlock: <%p>[s:%d,
 	pager_port_unlock(ds);
 
 	if (errors) {
+	    /* TODO: we could instead add an ERROR along NO_BLOCK
+	       to singlify returned errors to the pages actually lost instead
+	       of killing the whole object.  */
 	    static int warned = 0;
 	    if (!warned) {
 		printf("(default pager): previous write error for object, killing it\n");
@@ -2588,6 +2591,7 @@ ddprintf ("seqnos_memory_object_data_initialize <%p>: pager_port_unlock: <%p>[s:
 			printf("(default pager): data_initialize write error, losing data\n");
 		    }
 		    dstruct_lock(ds);
+		    /* TODO: mark page as lost instead.  */
 		    ds->errors++;
 		    dstruct_unlock(ds);
 		}
@@ -2675,6 +2679,7 @@ seqnos_memory_object_data_return(default_pager_t	ds,
 		    warned = 1;
 		}
 		dstruct_lock(ds);
+		/* TODO: mark page as lost instead.  */
 		ds->errors++;
 		dstruct_unlock(ds);
 	    }
