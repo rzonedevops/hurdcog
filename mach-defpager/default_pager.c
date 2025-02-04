@@ -2519,7 +2519,13 @@ ddprintf ("seqnos_memory_object_data_request <%p>: pager_port_unlock: <%p>[s:%d,
 		break;
 
 	    case PAGER_ERROR:
-		printf("(default pager): data_request read error, lost data\n");
+		{
+		    static int warned = 0;
+		    if (!warned) {
+			printf("(default pager): data_request read error, lost data\n");
+			warned = 1;
+		    }
+		}
 		(void) memory_object_data_error(
 			reply_to,
 			offset,
