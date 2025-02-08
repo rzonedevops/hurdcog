@@ -358,7 +358,7 @@ S_term_getctty (struct trivfs_protid *cred,
 
   if (!cred
       || cred->pi.bucket != term_bucket
-      || cred->pi.class != tty_class)
+      || (cred->pi.class != tty_class && cred->pi.class != pty_class))
     return EOPNOTSUPP;
 
   pthread_mutex_lock (&global_lock);
