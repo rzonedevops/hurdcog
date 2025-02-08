@@ -784,6 +784,8 @@ console_client_translator (void *unused)
 {
   error_t err;
 
+  pthread_setname_np (pthread_self (), "netfs");
+
   do
     {
       ports_manage_port_operations_multithread (netfs_port_bucket,

@@ -94,6 +94,9 @@ static void *
 periodic_sync (void *arg)
 {
   int interval = (int)(uintptr_t) arg;
+
+  pthread_setname_np (pthread_self (), "sync");
+
   for (;;)
     {
       error_t err;

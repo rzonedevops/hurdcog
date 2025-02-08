@@ -26,6 +26,7 @@
 #include <assert-backtrace.h>
 #include <argp.h>
 #include <error.h>
+#include <pthread.h>
 #include "auth_S.h"
 #include "auth_request_U.h"
 #include "interrupt_S.h"
@@ -320,6 +321,8 @@ auth_demuxer (mach_msg_header_t *inp, mach_msg_header_t *outp)
 static void *
 handle_auth_requests (void *ignored)
 {
+  pthread_setname_np (pthread_self (), "auth");
+
   while (1)
     ports_manage_port_operations_multithread (auth_bucket, auth_demuxer,
 					      30 * 1000, 0, 0);

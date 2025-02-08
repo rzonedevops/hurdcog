@@ -248,6 +248,8 @@ gather_vm_cache_statistics (void)
 static void *
 gather_thread (void *args)
 {
+  pthread_setname_np (pthread_self (), "gather");
+
   while (1)
     {
       gather_slab_info ();

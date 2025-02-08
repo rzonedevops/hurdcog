@@ -102,6 +102,8 @@ static struct port_bucket *etherport_bucket;
 static void *
 ethernet_thread (void *arg)
 {
+  pthread_setname_np (pthread_self (), "ethernet");
+
   ports_manage_port_operations_one_thread (etherport_bucket,
 					   ethernet_demuxer,
 					   0);

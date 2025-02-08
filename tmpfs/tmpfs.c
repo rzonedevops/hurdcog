@@ -22,6 +22,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <error.h>
+#include <pthread.h>
 
 #include "tmpfs.h"
 #include <limits.h>
@@ -296,6 +297,8 @@ diskfs_thread_function (void *demuxer)
 {
   static int thread_timeout = 1000 * 60 * 2; /* two minutes */
   error_t err;
+
+  pthread_setname_np (pthread_self (), "diskfs");
 
   do
     {

@@ -56,6 +56,8 @@ server_loop (void *arg)
   socklen_t addrlen;
   int cc;
 
+  pthread_setname_np (pthread_self (), "server_loop");
+
   memset (&fakec, 0, sizeof (struct cache_handle));
 
   for (;;)

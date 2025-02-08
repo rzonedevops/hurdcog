@@ -292,6 +292,8 @@ service_paging_requests (void *arg)
 {
   struct pager_requests *requests = arg;
 
+  pthread_setname_np (pthread_self (), "paging_requests");
+
   int demuxer (mach_msg_header_t *inp,
 	       mach_msg_header_t *outp)
   {
