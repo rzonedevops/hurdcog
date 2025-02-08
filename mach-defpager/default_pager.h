@@ -24,6 +24,8 @@
 
 #include <file_io.h>
 
+extern mach_port_t default_pager_exception_port;
+
 void default_pager(void);
 void default_pager_initialize(mach_port_t host_port);
 
