@@ -114,10 +114,6 @@ case "$flags" in
   ;;
 esac
 
-# Start the default pager.  It will bail if there is already one running.
-echo Starting default pager
-/hurd/mach-defpager
-
 # This is necessary to make stat / return the correct device ids.
 fsysopts / --update --readonly
 

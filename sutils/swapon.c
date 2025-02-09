@@ -88,7 +88,7 @@ static char *doc =
 static mach_port_t def_pager = MACH_PORT_NULL;
 static mach_port_t dev_master = MACH_PORT_NULL;
 
-static void get_def_pager(void)
+static void get_def_pager(int autostart)
 {
   int err;
   mach_port_t host;
@@ -114,7 +114,25 @@ static void get_def_pager(void)
       if (err)
 	error (13, err, "Cannot get default pager port");
       if (def_pager == MACH_PORT_NULL)
-	error (14, 0, "No default pager (memory manager) is running!");
+	{
+	  error (autostart ? 0 : 14, 0,
+	         "No default pager (memory manager) is running");
+	  if (autostart)
+	    {
+	      /* Try to auto-start it.  */
+	      err = system ("/hurd/mach-defpager");
+	      if (err)
+		error (15, err, "Could not start it");
+	      else
+		{
+		  fprintf (stderr, "Started it\n");
+		  err = vm_set_default_memory_manager (host, &def_pager);
+		  mach_port_deallocate (mach_task_self (), host);
+		  if (err)
+		    error (16, err, "Cannot get default pager port");
+		}
+	    }
+	}
     }
 }
 
@@ -400,7 +418,7 @@ swaponoff (const char *file, int add, int skipnotexisting)
       return EINVAL;
     }
 
-  get_def_pager();
+  get_def_pager (add);
 
   recnum_t runs[store->num_runs * 2];
   size_t i, j;
@@ -534,7 +552,7 @@ main (int argc, char *argv[])
       size_t i;
       int err;
 
-      get_def_pager();
+      get_def_pager (0);
 
       err = default_pager_storage_info (def_pager, &size, &nsize, &free, &nfree,
 					&names, &names_len);
