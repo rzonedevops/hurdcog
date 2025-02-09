@@ -340,7 +340,7 @@ void
 initialize_version_info (void)
 {
   extern const char *const mach_cpu_types[];
-#ifndef __x86_64__
+#ifdef __i386__
   extern const char *const mach_cpu_subtypes[][32];
 #endif
   kernel_version_t kv;
@@ -357,11 +357,11 @@ initialize_version_info (void)
   assert_backtrace (! err);
   snprintf (uname_info.machine, sizeof uname_info.machine,
 	    "%s"
-#if !defined (__x86_64__) && !defined (__aarch64__)
+#ifdef __i386__
 	    "-%s"
 #endif
 	    , mach_cpu_types[info.cpu_type]
-#if !defined (__x86_64__) && !defined (__aarch64__)
+#ifdef __i386__
 	    , mach_cpu_subtypes[info.cpu_type][info.cpu_subtype]
 #endif
 	    );
