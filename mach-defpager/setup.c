@@ -100,7 +100,7 @@ S_default_pager_paging_storage_new (mach_port_t pager,
   return 0;
 }
 
-#ifndef __x86_64__
+#ifdef __i386__
 kern_return_t
 S_default_pager_paging_storage (mach_port_t pager,
 				mach_port_t device,

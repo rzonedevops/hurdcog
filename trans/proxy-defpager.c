@@ -112,7 +112,7 @@ S_default_pager_paging_storage_new (mach_port_t default_pager,
 
   err = default_pager_paging_storage_new (real_defpager, dev_master,
                                           runs, nruns, name, add);
-#ifndef __x86_64__
+#ifdef __i386__
   if (err == MIG_BAD_ID || err == EOPNOTSUPP)
     {
       err = default_pager_paging_storage (real_defpager, dev_master,
@@ -128,7 +128,7 @@ S_default_pager_paging_storage_new (mach_port_t default_pager,
   return 0;
 }
 
-#ifndef __x86_64__
+#ifdef __i386__
 kern_return_t
 S_default_pager_paging_storage (mach_port_t default_pager,
 				mach_port_t device,
