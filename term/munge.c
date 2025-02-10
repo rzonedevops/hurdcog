@@ -38,7 +38,7 @@ int output_psize;
 /* Actually drop character onto output queue.  This should be the
    only place where we actually enqueue characters on the output queue;
    it is responsible for keeping track of cursor positions. */
-inline void
+static inline void
 poutput (int c)
 {
   if (termflags & FLUSH_OUTPUT)
