@@ -313,24 +313,24 @@ rootdir_gc_meminfo (void *hook, char **contents, ssize_t *contents_len)
 
   assert_backtrace (cnt == HOST_BASIC_INFO_COUNT);
   fprintf (m,
-      "MemTotal: %14lu kB\n"
-      "MemFree:  %14lu kB\n"
-      "Buffers:  %14lu kB\n"
-      "Cached:   %14lu kB\n"
-      "Active:   %14lu kB\n"
-      "Inactive: %14lu kB\n"
-      "Mlocked:  %14lu kB\n"
+      "MemTotal: %14llu kB\n"
+      "MemFree:  %14llu kB\n"
+      "Buffers:  %14llu kB\n"
+      "Cached:   %14llu kB\n"
+      "Active:   %14llu kB\n"
+      "Inactive: %14llu kB\n"
+      "Mlocked:  %14llu kB\n"
       ,
-      (long unsigned) (vmstats.free_count +
-		       vmstats.active_count +
-		       vmstats.inactive_count +
-		       vmstats.wire_count) * PAGE_SIZE / 1024,
-      (long unsigned) vmstats.free_count * PAGE_SIZE / 1024,
+      (long long unsigned) (vmstats.free_count +
+		            vmstats.active_count +
+		            vmstats.inactive_count +
+		            vmstats.wire_count) * PAGE_SIZE / 1024,
+      (long long unsigned) vmstats.free_count * PAGE_SIZE / 1024,
       0UL,
-      (long unsigned) cache_stats.cache_count * PAGE_SIZE / 1024,
-      (long unsigned) vmstats.active_count * PAGE_SIZE / 1024,
-      (long unsigned) vmstats.inactive_count * PAGE_SIZE / 1024,
-      (long unsigned) vmstats.wire_count * PAGE_SIZE / 1024);
+      (long long unsigned) cache_stats.cache_count * PAGE_SIZE / 1024,
+      (long long unsigned) vmstats.active_count * PAGE_SIZE / 1024,
+      (long long unsigned) vmstats.inactive_count * PAGE_SIZE / 1024,
+      (long long unsigned) vmstats.wire_count * PAGE_SIZE / 1024);
 
   err = get_swapinfo (&swap);
   if (err)
