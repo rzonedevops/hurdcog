@@ -208,10 +208,9 @@ pipe_select_readable (struct pipe *pipe, struct timespec *tsp, int data_only)
 PIPE_EI error_t
 pipe_wait_writable (struct pipe *pipe, int noblock)
 {
-  size_t limit = pipe->write_limit;
   if (pipe->flags & PIPE_BROKEN)
     return EPIPE;
-  while (pipe_readable (pipe, 1) >= limit)
+  while (pipe_readable (pipe, 1) >= pipe->write_limit)
     {
       if (noblock)
 	return EWOULDBLOCK;
@@ -229,9 +228,9 @@ pipe_wait_writable (struct pipe *pipe, int noblock)
 PIPE_EI error_t
 pipe_select_writable (struct pipe *pipe, struct timespec *tsp)
 {
-  size_t limit = pipe->write_limit;
   error_t err = 0;
-  while (! (pipe->flags & PIPE_BROKEN) && pipe_readable (pipe, 1) >= limit)
+  while (! (pipe->flags & PIPE_BROKEN)
+	 && pipe_readable (pipe, 1) >= pipe->write_limit)
     {
       err = pthread_hurd_cond_timedwait_np (&pipe->pending_writes,
 					    &pipe->lock, tsp);
