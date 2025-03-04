@@ -129,6 +129,8 @@ extern error_t pipe_wait_readable (struct pipe *pipe, int noblock, int data_only
 extern error_t pipe_select_readable (struct pipe *pipe, struct timespec *tsp,
 				     int data_only);
 
+extern error_t pipe_wait_writable_amount (struct pipe *pipe, int noblock, size_t amount);
+
 extern error_t pipe_wait_writable (struct pipe *pipe, int noblock);
 
 extern error_t pipe_select_writable (struct pipe *pipe, struct timespec *tsp);
@@ -202,15 +204,15 @@ pipe_select_readable (struct pipe *pipe, struct timespec *tsp, int data_only)
   return err;
 }
 
-/* Block until data can be written to PIPE.  If NOBLOCK is true, then
-   EWOULDBLOCK is returned instead of blocking if this can't be done
+/* Block until at least AMOUNT data can be written to PIPE.  If NOBLOCK is true,
+   then EWOULDBLOCK is returned instead of blocking if this can't be done
    immediately.  */
 PIPE_EI error_t
-pipe_wait_writable (struct pipe *pipe, int noblock)
+pipe_wait_writable_amount (struct pipe *pipe, int noblock, size_t amount)
 {
   if (pipe->flags & PIPE_BROKEN)
     return EPIPE;
-  while (pipe_readable (pipe, 1) >= pipe->write_limit)
+  while (pipe_readable (pipe, 1) + amount >= pipe->write_limit)
     {
       if (noblock)
 	return EWOULDBLOCK;
@@ -220,6 +222,15 @@ pipe_wait_writable (struct pipe *pipe, int noblock)
 	return EPIPE;
     }
   return 0;
+}
+
+/* Block until data can be written to PIPE.  If NOBLOCK is true, then
+   EWOULDBLOCK is returned instead of blocking if this can't be done
+   immediately.  */
+PIPE_EI error_t
+pipe_wait_writable (struct pipe *pipe, int noblock)
+{
+  return pipe_wait_writable_amount (pipe, noblock, 1);
 }
 
 /* Block until some data can be written to PIPE.  This call only returns once
