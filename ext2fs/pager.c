@@ -410,7 +410,11 @@ file_pager_write_page (struct node *node, vm_offset_t offset, void *buf)
       err = find_block (node, offset, &block, &lock);
       if (err)
 	break;
-      assert_backtrace (block);
+      if (!block)
+	{
+	  err = EINVAL;
+	  break;
+	}
       pending_blocks_add (&pb, block);
       offset += block_size;
       left -= block_size;
