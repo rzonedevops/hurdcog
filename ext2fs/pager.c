@@ -41,6 +41,8 @@ struct pager_requests *file_pager_requests;
 
 pthread_spinlock_t node_to_page_lock = PTHREAD_SPINLOCK_INITIALIZER;
 
+static int disk_cache_initialized;
+
 
 #ifdef DONT_CACHE_MEMORY_OBJECTS
 #define MAY_CACHE 0
@@ -953,6 +955,7 @@ disk_cache_init (void)
       assert_backtrace (disk_cache_info[i-fixed_first].block == i);
       disk_cache_info[i-fixed_first].flags |= DC_FIXED;
     }
+  disk_cache_initialized = 1;
 }
 
 static void
@@ -1022,7 +1025,10 @@ disk_cache_block_ref (block_t block)
   void *bptr;
   hurd_ihash_locp_t slot;
 
-  assert_backtrace (block < store->size >> log2_block_size);
+  /* Trap trying to map superblock, block group descriptor table, or beyond the end */
+  if (disk_cache_initialized)
+    assert_backtrace (block >= group_desc_block_end
+		   && block < store->size >> log2_block_size);
 
   ext2_debug ("(%u)", block);
 

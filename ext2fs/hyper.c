@@ -180,7 +180,7 @@ map_hypermetadata (void)
   /* Cache a convenient pointer to the block group descriptors for allocation.
      These are stored in the filesystem blocks following the superblock.  */
   group_desc_image =
-    (struct ext2_group_desc *) bptr (bptr_block (mapped_sblock) + 1);
+    (struct ext2_group_desc *) bptr (group_desc_block);
 }
 
 error_t

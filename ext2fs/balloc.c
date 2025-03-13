@@ -63,6 +63,10 @@ ext2_free_blocks (block_t block, unsigned long count)
   unsigned long i;
   struct ext2_group_desc *gdp;
 
+  /* Trap trying to free superblock, block group descriptor table, or beyond the end */
+  assert_backtrace (block >= group_desc_block_end
+		 && block < store->size >> log2_block_size);
+
   pthread_spin_lock (&global_lock);
 
   if (block < le32toh (sblock->s_first_data_block) ||
@@ -401,6 +405,10 @@ got_block:
   assert_backtrace (bh == NULL);
   pthread_spin_unlock (&global_lock);
   alloc_sync (0);
+
+  /* Trap trying to allocate superblock, block group descriptor table, or beyond the end */
+  assert_backtrace (j >= group_desc_block_end
+		 && j < store->size >> log2_block_size);
 
   return j;
 }

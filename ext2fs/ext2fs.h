@@ -405,6 +405,10 @@ bptr_offs (void *ptr)
 #define group_desc(num)	(&group_desc_image[num])
 extern struct ext2_group_desc *group_desc_image;
 
+#define group_desc_block (boffs_block (SBLOCK_OFFS) + 1)
+#define group_desc_size (groups_count * sizeof(struct ext2_group_desc))
+#define group_desc_block_end (group_desc_block + boffs_block(round_block(group_desc_size)))
+
 #define inode_group_num(inum) (((inum) - 1) / le32toh (sblock->s_inodes_per_group))
 
 /* Forward declarations for the following functions that are usually
