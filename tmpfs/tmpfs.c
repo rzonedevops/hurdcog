@@ -364,9 +364,25 @@ main (int argc, char **argv)
   else
     {
       err = vm_set_default_memory_manager (host_priv, &default_pager);
-      mach_port_deallocate (mach_task_self (), host_priv);
       if (err)
 	error (0, err, "Cannot get default pager port");
+      else
+	if (default_pager == MACH_PORT_NULL)
+	  {
+	    error (0, 0, "No default pager (memory manager) is running");
+	    /* Try to auto-start it.  */
+	    err = system ("/hurd/mach-defpager");
+	    if (err)
+	      error (0, err, "Could not start it");
+	    else
+	      {
+		fprintf (stderr, "Started it\n");
+		err = vm_set_default_memory_manager (host_priv, &default_pager);
+		if (err)
+		  error(0, err, "Cannot get default pager port");
+	      }
+	  }
+      mach_port_deallocate (mach_task_self (), host_priv);
     }
   if (default_pager == MACH_PORT_NULL)
     error (0, 0, "files cannot have contents with no default pager port");

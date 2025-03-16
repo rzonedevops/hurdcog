@@ -110,7 +110,6 @@ static void get_def_pager(int autostart)
 	error (12, err, "Cannot get privileged ports");
 
       err = vm_set_default_memory_manager (host, &def_pager);
-      mach_port_deallocate (mach_task_self (), host);
       if (err)
 	error (13, err, "Cannot get default pager port");
       if (def_pager == MACH_PORT_NULL)
@@ -127,12 +126,12 @@ static void get_def_pager(int autostart)
 		{
 		  fprintf (stderr, "Started it\n");
 		  err = vm_set_default_memory_manager (host, &def_pager);
-		  mach_port_deallocate (mach_task_self (), host);
 		  if (err)
 		    error (16, err, "Cannot get default pager port");
 		}
 	    }
 	}
+      mach_port_deallocate (mach_task_self (), host);
     }
 }
 
