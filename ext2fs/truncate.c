@@ -291,7 +291,9 @@ diskfs_truncate (struct node *node, off_t length)
   if (length >= node->dn_stat.st_size)
     return 0;
 
-  if (! node->dn_stat.st_blocks)
+  if (! node->dn_stat.st_blocks
+      && !S_ISREG (node->dn_stat.st_mode)
+      && !S_ISDIR (node->dn_stat.st_mode))
     /* There aren't really any blocks allocated, so just frob the size.  This
        is true for fast symlinks, and also apparently for some device nodes
        in linux.  */
