@@ -314,40 +314,38 @@ diskfs_alloc_node (struct node *dir, mode_t mode, struct node **node)
 
   st = &np->dn_stat;
 
-  if (st->st_blocks)
-    {
-      st->st_blocks = 0;
-      np->dn_set_ctime = 1;
-    }
+  np->dn_set_ctime = 1;
+  np->allocsize = 0;
+  st->st_blocks = 0;
+  st->st_mode &= ~S_IPTRANS;
+  st->st_size = 0;
+  st->st_flags = 0;
+
+  diskfs_node_disknode (np)->info_i_translator = 0;
 
   /* Zero out the block pointers in case there's some noise left on disk.  */
   for (block = 0; block < EXT2_N_BLOCKS; block++)
-    if (diskfs_node_disknode (np)->info.i_data[block] != 0)
-      {
-	diskfs_node_disknode (np)->info.i_data[block] = 0;
-	np->dn_set_ctime = 1;
-      }
-
-  if (diskfs_node_disknode (np)->info_i_translator != 0)
-    {
-      diskfs_node_disknode (np)->info_i_translator = 0;
-      np->dn_set_ctime = 1;
-    }
-
-  st->st_mode &= ~S_IPTRANS;
-  if (np->allocsize)
-    {
-      st->st_size = 0;
-      np->allocsize = 0;
-      np->dn_set_ctime = 1;
-    }
+    diskfs_node_disknode (np)->info.i_data[block] = 0;
 
   /* Propagate initial inode flags from the directory, as Linux does.  */
   diskfs_node_disknode (np)->info.i_flags =
     ext2_mask_flags(mode,
 	       diskfs_node_disknode (dir)->info.i_flags & EXT2_FL_INHERITED);
 
-  st->st_flags = 0;
+  diskfs_node_disknode (np)->info.i_faddr = 0;
+  diskfs_node_disknode (np)->info.i_frag_no = 0;
+  diskfs_node_disknode (np)->info.i_frag_size = 0;
+  diskfs_node_disknode (np)->info.i_osync = 0;
+  diskfs_node_disknode (np)->info.i_file_acl = 0;
+  diskfs_node_disknode (np)->info.i_dir_acl = 0;
+  diskfs_node_disknode (np)->info.i_dtime = 0;
+  /* diskfs_node_disknode (np)->info.not_used_1 */
+  diskfs_node_disknode (np)->info.i_block_group = inode_group_num (np->cache_id);
+  diskfs_node_disknode (np)->info.i_next_alloc_block = 0;
+  diskfs_node_disknode (np)->info.i_next_alloc_goal = 0;
+  diskfs_node_disknode (np)->info.i_prealloc_block = 0;
+  diskfs_node_disknode (np)->info.i_prealloc_count = 0;
+  /* diskfs_node_disknode (np)->info.i_new_inode */
 
   /*
    * Set up a new generation number for this inode.
