@@ -65,7 +65,7 @@ ext2_free_blocks (block_t block, unsigned long count)
 
   /* Trap trying to free superblock, block group descriptor table, or beyond the end */
   assert_backtrace (block >= group_desc_block_end
-		 && block < store->size >> log2_block_size);
+		 && block + count <= store->size >> log2_block_size);
 
   pthread_spin_lock (&global_lock);
 
