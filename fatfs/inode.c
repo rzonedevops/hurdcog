@@ -533,8 +533,8 @@ diskfs_truncate (struct node *node, loff_t length)
     {
       fat_truncate_node(node, round_cluster(length) >> log2_bytes_per_cluster);
       node->allocsize = round_cluster(length);
+      diskfs_end_catch_exception ();
     }
-  diskfs_end_catch_exception ();
 
   node->dn_set_mtime = 1;
   node->dn_set_ctime = 1;

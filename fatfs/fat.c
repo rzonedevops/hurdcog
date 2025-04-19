@@ -606,8 +606,8 @@ fat_get_freespace (void)
 	  if (next_cluster == FAT_FREE_CLUSTER)
 	    free_clusters++;
 	}
+      diskfs_end_catch_exception ();
     }
-  diskfs_end_catch_exception ();
 
   return free_clusters;
 }

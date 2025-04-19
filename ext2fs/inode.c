@@ -634,7 +634,10 @@ diskfs_set_translator (struct node *np, const char *name, mach_msg_type_number_t
       char buf[block_size];
 
       if (namelen + 2 > block_size)
-	return ENAMETOOLONG;
+	{
+	  diskfs_end_catch_exception ();
+	  return ENAMETOOLONG;
+	}
 
       di = dino_ref (np->cache_id);
       blkno = le32toh (di->i_translator);
@@ -650,7 +653,10 @@ diskfs_set_translator (struct node *np, const char *name, mach_msg_type_number_t
 	      newmode = (np->dn_stat.st_mode & ~S_IFMT) | S_IFREG;
 	      err = diskfs_validate_mode_change (np, newmode);
 	      if (err)
-		return err;
+		{
+		  diskfs_end_catch_exception ();
+		  return err;
+		}
 	    }
 
 	  /* Allocate block for translator */
@@ -712,7 +718,10 @@ diskfs_set_translator (struct node *np, const char *name, mach_msg_type_number_t
 	}
     }
   else
-    return EOPNOTSUPP;
+    {
+      diskfs_end_catch_exception ();
+      return EOPNOTSUPP;
+    }
 
 
   diskfs_end_catch_exception ();
@@ -778,7 +787,10 @@ diskfs_get_translator (struct node *np, char **namep, mach_msg_type_number_t *na
     {
       err = ext2_get_xattr (np, "gnu.translator", NULL, &datalen);
       if (err)
-        return err;
+	{
+	  diskfs_end_catch_exception ();
+	  return err;
+	}
 
       *namep = malloc (datalen);
       if (!*namep)
@@ -790,6 +802,9 @@ diskfs_get_translator (struct node *np, char **namep, mach_msg_type_number_t *na
 
       *namelen = datalen;
     }
+  else
+    diskfs_end_catch_exception ();
+
   return err;
 }
 

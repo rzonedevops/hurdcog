@@ -617,8 +617,8 @@ pager_unlock_page (struct user_pager_info *pager, vm_offset_t page)
 		break;
 	      left -= block_size;
 	    }
+	  diskfs_end_catch_exception ();
 	}
-      diskfs_end_catch_exception ();
 
       if (partial_page)
 	/* If an error occurred, this page still isn't writable; otherwise,
@@ -711,12 +711,15 @@ diskfs_grow (struct node *node, off_t size, struct protid *cred)
 			  end_block);
 
 	      err = diskfs_catch_exception ();
-	      while (!err && end_block < writable_end)
+	      if (! err)
 		{
-		  block_t disk_block;
-		  err = ext2_getblk (node, end_block++, 1, &disk_block);
+		  while (!err && end_block < writable_end)
+		    {
+		      block_t disk_block;
+		      err = ext2_getblk (node, end_block++, 1, &disk_block);
+		    }
+		  diskfs_end_catch_exception ();
 		}
-	      diskfs_end_catch_exception ();
 
 	      if (! err)
 		/* Reflect how much we allocated successfully.  */

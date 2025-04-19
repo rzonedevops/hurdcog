@@ -646,12 +646,15 @@ diskfs_grow (struct node *node, loff_t size, struct protid *cred)
       if (new_end_cluster > end_cluster)
         {
 	  err = diskfs_catch_exception ();
-	  while (!err && end_cluster < new_end_cluster)
+	  if (! err)
 	    {
-	      cluster_t disk_cluster;
-	      err = fat_getcluster (node, end_cluster++, 1, &disk_cluster);
+	      while (!err && end_cluster < new_end_cluster)
+		{
+		  cluster_t disk_cluster;
+		  err = fat_getcluster (node, end_cluster++, 1, &disk_cluster);
+		}
+	      diskfs_end_catch_exception ();
 	    }
-	  diskfs_end_catch_exception ();
 
 	  if (err)
 	    /* Reflect how much we allocated successfully.  */
