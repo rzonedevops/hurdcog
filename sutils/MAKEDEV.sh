@@ -251,7 +251,11 @@ mkdev() {
       # Linux, we tell tmpfs to set the size to half the physical RAM
       # in the machine.
       shm)
-        st $I root 644 d /hurd/tmpfs --mode=1777 50%
+        # Not yet, see https://darnassus.sceen.net/~hurd-web/open_issues/tmpfs/
+        #st $I root 644 d /hurd/tmpfs --mode=1777 50%
+        if [ ! -e "/dev/$I" ]; then
+          ln -s /tmp /dev/$I
+        fi
         ;;
 
       pseudo-root)
