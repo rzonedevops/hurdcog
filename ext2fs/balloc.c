@@ -407,8 +407,9 @@ got_block:
   alloc_sync (0);
 
   /* Trap trying to allocate superblock, block group descriptor table, or beyond the end */
-  assert_backtrace (j >= group_desc_block_end
-		 && j < store->size >> log2_block_size);
+  assert_backtrace (j == 0 ||
+		    (j >= group_desc_block_end
+		     && j < store->size >> log2_block_size));
 
   return j;
 }

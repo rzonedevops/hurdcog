@@ -100,8 +100,9 @@ ext2_alloc_block (struct node *node, block_t goal, int zero)
     }
 
   /* Trap trying to allocate superblock, block group descriptor table, or beyond the end */
-  assert_backtrace (result >= group_desc_block_end
-		 && result < store->size >> log2_block_size);
+  assert_backtrace (result == 0 ||
+		    (result >= group_desc_block_end
+		     && result < store->size >> log2_block_size));
 #else
   result = ext2_new_block (goal, 0, 0);
 #endif
