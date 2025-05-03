@@ -335,6 +335,9 @@ AC_SUBST([libdaemon_CFLAGS])
 AC_CHECK_MEMBERS([struct thread_sched_info.last_processor],,,
  [#include <mach/thread_info.h>])
 
+AC_CHECK_MEMBERS([struct mapped_time_value.time_value.seconds],,,
+ [#include <mach/time_value.h>])
+
 PKG_CHECK_MODULES([libblkid], [blkid],
   [AC_DEFINE([HAVE_BLKID], [1], [Use libblkid])],
   [true])
