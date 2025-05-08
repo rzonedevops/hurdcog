@@ -1,6 +1,6 @@
 /* Sock functions
 
-   Copyright (C) 1995,96,2000,01,02, 2005 Free Software Foundation, Inc.
+   Copyright (C) 1995,96,2000,01,02, 2005, 2025 Free Software Foundation, Inc.
    Written by Miles Bader <miles@gnu.org>
 
    This program is free software; you can redistribute it and/or
@@ -167,8 +167,11 @@ sock_clone (struct sock *template, struct sock **sock)
   if (err)
     return err;
 
-  /* Copy some properties from TEMPLATE.  */
-  (*sock)->flags = template->flags & ~PFLOCAL_SOCK_CONNECTED;
+  /* Copy some properties from TEMPLATE.  Clear O_NONBLOCK because the socket
+     returned by 'accept' must not inherit O_NONBLOCK from the parent
+     socket.  */
+  (*sock)->flags =
+    template->flags & ~(PFLOCAL_SOCK_CONNECTED | PFLOCAL_SOCK_NONBLOCK);
 
   return 0;
 }
