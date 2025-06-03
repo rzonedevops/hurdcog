@@ -141,7 +141,7 @@ devio_fini (void)
 /* XXX Convert a real speed to a bogus Mach speed.  Return
    -1 if the real speed was bogus, else 0. */
 static int
-real_speed_to_bogus_speed (int rspeed, int *bspeed)
+real_speed_to_bogus_speed (speed_t rspeed, int *bspeed)
 {
   switch (rspeed)
     {
@@ -210,7 +210,7 @@ real_speed_to_bogus_speed (int rspeed, int *bspeed)
 }
 
 /* XXX Convert a bogus speed to a real speed.  */
-static int
+static speed_t
 bogus_speed_to_real_speed (int bspeed)
 {
   switch (bspeed)
