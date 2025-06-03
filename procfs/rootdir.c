@@ -326,7 +326,7 @@ rootdir_gc_meminfo (void *hook, char **contents, ssize_t *contents_len)
 		            vmstats.inactive_count +
 		            vmstats.wire_count) * PAGE_SIZE / 1024,
       (long long unsigned) vmstats.free_count * PAGE_SIZE / 1024,
-      0UL,
+      0ULL,
       (long long unsigned) cache_stats.cache_count * PAGE_SIZE / 1024,
       (long long unsigned) vmstats.active_count * PAGE_SIZE / 1024,
       (long long unsigned) vmstats.inactive_count * PAGE_SIZE / 1024,
