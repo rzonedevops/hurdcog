@@ -338,11 +338,11 @@ rootdir_gc_meminfo (void *hook, char **contents, ssize_t *contents_len)
     err = 0;
   else
     fprintf (m,
-      "SwapTotal:%14lu kB\n"
-      "SwapFree: %14lu kB\n"
+      "SwapTotal:%14llu kB\n"
+      "SwapFree: %14llu kB\n"
       ,
-      (long unsigned) swap.dpi_total_space / 1024,
-      (long unsigned) swap.dpi_free_space / 1024);
+      (long long unsigned) swap.dpi_total_space / 1024,
+      (long long unsigned) swap.dpi_free_space / 1024);
 
  out:
   if (m)
