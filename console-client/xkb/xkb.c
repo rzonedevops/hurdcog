@@ -311,6 +311,8 @@ get_special_char_interpretation(xkb_keysym_t input)
 void
 xkb_compose_update (keypress_t key)
 {
+  if (!compose_state)
+    return;
   if (!key.rel)
     xkb_compose_state_feed(compose_state, key.keycode);
 }
@@ -318,6 +320,8 @@ xkb_compose_update (keypress_t key)
 void
 xkb_compose_update_fini (void)
 {
+  if (!compose_state)
+    return;
   enum xkb_compose_status status = xkb_compose_state_get_status(compose_state);
   if (status == XKB_COMPOSE_CANCELLED || status == XKB_COMPOSE_COMPOSED)
     xkb_compose_state_reset(compose_state);
@@ -338,6 +342,9 @@ get_keysym_from_keycode (keycode_t keycode)
   xkb_keysym_t sym;
 
   sym = xkb_state_key_get_one_sym (state, keycode);
+  if (!compose_state)
+    return sym;
+
   enum xkb_compose_status status = xkb_compose_state_get_status (compose_state);
   if (status == XKB_COMPOSE_COMPOSING || status == XKB_COMPOSE_CANCELLED)
     return XKB_KEYSYM_MAX + 1;
@@ -472,11 +479,15 @@ xkb_compose_init (const char *composefile) {
     compose_table = xkb_compose_table_new_from_locale (ctx, locale, XKB_COMPOSE_COMPILE_NO_FLAGS);
 
   if (!compose_table)
-    return ENOMEM;
+    return 0;
 
   compose_state = xkb_compose_state_new (compose_table, XKB_COMPOSE_STATE_NO_FLAGS);
   if (!compose_state)
-    return ENOMEM;
+    {
+      xkb_compose_table_unref (compose_table);
+      compose_table = NULL;
+    }
+
   return 0;
 }
 
@@ -502,8 +513,10 @@ void
 xkb_context_cleanup (void)
 {
   /* compose cleanup */
-  xkb_compose_state_unref (compose_state);
-  xkb_compose_table_unref (compose_table);
+  if (compose_state)
+    xkb_compose_state_unref (compose_state);
+  if (compose_table)
+    xkb_compose_table_unref (compose_table);
 
   /* state cleanup */
   xkb_state_unref (state);
