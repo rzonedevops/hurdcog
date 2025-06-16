@@ -20,6 +20,9 @@
 #include <mach/mig_errors.h>
 #include <pthread.h>
 #include <string.h>
+#include <sys/resource.h>
+#include <errno.h>
+#include <stdio.h>
 
 #include "priv.h"
 #include "memory_object_S.h"
@@ -316,8 +319,13 @@ pager_start_workers (struct port_bucket *pager_bucket,
   int i;
   pthread_t t;
   struct pager_requests *requests;
+  struct rlimit limits = { RLIM_INFINITY, RLIM_INFINITY };
 
   assert_backtrace (out_requests != NULL);
+
+  /* Lift default address space limits if we are allowed */
+  if (setrlimit (RLIMIT_AS, &limits) == -1 && errno != EPERM)
+    perror ("error lifting address space limits");
 
   requests = malloc (sizeof *requests);
   if (requests == NULL)
