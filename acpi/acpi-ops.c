@@ -30,6 +30,13 @@
 #include <acpi/acpi_init.h>
 #include "acpifs.h"
 
+/* PIIX3 chipset returns IRQ 9 for all ACPI irq requests
+ * but IDE is actually wired to legacy irqs 14 and 15.
+ * To avoid needing pci access in acpi, we can consider
+ * all mappings to 9 to be invalid irqs and use
+ * bios defaults for these requests instead. */
+#define WRONG_IRQ 9
+
 static error_t
 check_permissions (struct protid *master, int flags)
 {
@@ -83,6 +90,8 @@ S_acpi_get_pci_irq (struct protid *master,
     return err;
 
   ret = acpi_get_irq_number(bus, dev, func);
+  if (ret == WRONG_IRQ)
+    return EOPNOTSUPP;
   if (ret < 0)
     return EIO;
 
