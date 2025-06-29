@@ -185,7 +185,11 @@ mkdev() {
 	st $I root 660 c /hurd/rumpdisk
 	cmd ln -f -s rumpdisk disk
 	;;
-      [hrscw]d*)
+      rumpusbdisk)
+	st $I root 660 c /hurd/rumpusbdisk
+	cmd ln -f -s rumpusbdisk usbdisk
+	;;
+      [hrscwu]d*)
 	local sliceno=
         local n="${I#?d}"
 	local major="${n%%[!0-9]*}"
@@ -220,16 +224,23 @@ mkdev() {
 	  lose "$I: Invalid slice or partition syntax"
 	  ;;
 	esac
+
+	dev=${I%s[0-9]*}
+
 	case "$I" in
 	wd*|cd*)
 	  USE_PARTSTORE=1
 	  MASTER=@/dev/disk:
 	  ;;
+	ud*)
+	  USE_PARTSTORE=1
+	  MASTER=@/dev/usbdisk:
+	  dev=${dev/u/s}
+	  ;;
 	esac
 
 	# The device name passed all syntax checks, so finally use it!
 	if [ "$USE_PARTSTORE" ] && [ -z "$rest" ] && [ "$sliceno" ]; then
-	  local dev=${I%s[0-9]*}
 	  st $I root 640 b /hurd/storeio -T typed part:$sliceno:device:$MASTER$dev
 	else
 	  st $I root 640 b /hurd/storeio $MASTER$I
