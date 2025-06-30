@@ -438,7 +438,7 @@ conchar_attr_to_attr (conchar_attr_t attr)
 static inline short
 conchar_attr_to_color_pair (conchar_attr_t attr)
 {
-  return COLOR_PAIR (attr.bgcol << 3 | attr.fgcol);
+  return attr.bgcol << 3 | attr.fgcol;
 }
 
 static void
