@@ -61,6 +61,7 @@ modules = vga pc_kbd generic_speaker pc_mouse current_vcs
 
 vga-CPPFLAGS = -DDEFAULT_VGA_FONT_DIR=\"${datadir}/hurd/\"
 fb-CPPFLAGS = -DDEFAULT_VGA_FONT_DIR=\"${datadir}/hurd/\"
+vga-support-CFLAGS = -minline-all-stringops
 vga.so.$(hurd-version): $(patsubst %.c,%_pic.o,$(VGA_SO_SRCS))
 pc_kbd.so.$(hurd-version): $(patsubst %.c,%_pic.o,$(PC_KBD_SO_SRCS)) \
 	kdioctlServer_pic.o

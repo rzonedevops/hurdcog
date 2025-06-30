@@ -485,14 +485,14 @@ vga_display_scroll (void *handle, int delta)
 
   if (delta > 0)
     {
-      memmove (vga_videomem, vga_videomem + 2 * count,
-	       2 * disp->width * (disp->height - delta));
+      vga_memmove (vga_videomem, vga_videomem + 2 * count,
+		    2 * disp->width * (disp->height - delta));
       refpos = &disp->refmatrix[0][0];
     }
   else
     {
-      memmove (vga_videomem + 2 * count, vga_videomem,
-	       2 * disp->width * (disp->height + delta));
+      vga_memmove (vga_videomem + 2 * count, vga_videomem,
+		    2 * disp->width * (disp->height + delta));
       refpos = &disp->refmatrix[disp->height + delta][0];
     }
   

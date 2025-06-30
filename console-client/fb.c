@@ -228,7 +228,7 @@ fb_init(void)
     return err;
 
   /* Clear screen */
-  memset (vga_videomem, 0, fb_width * fb_height * fb_bpp/8);
+  vga_memset (vga_videomem, 0, fb_width * fb_height * fb_bpp/8);
   return 0;
 }
 
@@ -454,26 +454,26 @@ fb_display_scroll (void *handle, int delta)
 
   if (delta > 0)
     {
-      memmove (vga_videomem, vga_videomem + fb_bpp/8 * pixels,
-	       fb_bpp/8 * disp->width * (disp->height - delta*fb_hc));
+      vga_memmove (vga_videomem, vga_videomem + fb_bpp/8 * pixels,
+		    fb_bpp/8 * disp->width * (disp->height - delta*fb_hc));
     }
   else
     {
-      memmove (vga_videomem + fb_bpp/8 * pixels, vga_videomem,
-	       fb_bpp/8 * disp->width * (disp->height + delta*fb_hc));
+      vga_memmove (vga_videomem + fb_bpp/8 * pixels, vga_videomem,
+		    fb_bpp/8 * disp->width * (disp->height + delta*fb_hc));
     }
 
   if (delta > 0)
     {
       r = disp->height/fb_hc - delta;
-      memmove (&disp->refmatrix[0][0], &disp->refmatrix[0][0] + chars,
-	       sizeof (struct fbchr) * disp->width/fb_wc * r);
+      vga_memmove (&disp->refmatrix[0][0], &disp->refmatrix[0][0] + chars,
+		    sizeof (struct fbchr) * disp->width/fb_wc * r);
     }
   else
     {
       r = 0;
-      memmove (&disp->refmatrix[0][0] + chars, &disp->refmatrix[0][0],
-	       sizeof (struct fbchr) * disp->width/fb_wc * (disp->height/fb_hc + delta));
+      vga_memmove (&disp->refmatrix[0][0] + chars, &disp->refmatrix[0][0],
+		    sizeof (struct fbchr) * disp->width/fb_wc * (disp->height/fb_hc + delta));
     }
 
   return 0;
