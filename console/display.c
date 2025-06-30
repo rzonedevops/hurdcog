@@ -215,8 +215,14 @@ nowait_file_changed (mach_port_t notify_port, natural_t tickno,
     mach_msg_header_t Head;
     mach_msg_type_t ticknoType;
     natural_t tickno;
+#ifdef __LP64__
+    char ticknoPad[4];
+#endif
     mach_msg_type_t changeType;
     file_changed_type_t change;
+#ifdef __LP64__
+    char changePad[4];
+#endif
     mach_msg_type_t startType;
     loff_t start;
     mach_msg_type_t endType;
@@ -286,11 +292,11 @@ nowait_file_changed (mach_port_t notify_port, natural_t tickno,
 
   if (notify == MACH_PORT_NULL)
     return mach_msg (&InP->Head, MACH_SEND_MSG | MACH_MSG_OPTION_NONE,
-		     64, 0, MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE,
+		     sizeof(Request), 0, MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE,
 		     MACH_PORT_NULL);
   else
     return mach_msg (&InP->Head, MACH_SEND_MSG | MACH_SEND_NOTIFY,
-		     64, 0, MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE,
+		     sizeof(Request), 0, MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE,
 		     notify);
 }
 
