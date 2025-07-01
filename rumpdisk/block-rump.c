@@ -156,11 +156,11 @@ rumpdisk_device_init (void)
 {
   mach_port_t device_master;
 
-#ifdef _RUMP_SATA
   if (! get_privileged_ports (&master_host, &device_master))
     {
       device_t device;
 
+#ifdef _RUMP_SATA
 #if 0
       if (! device_open (device_master, D_READ, "hd0", &device)
        || ! device_open (device_master, D_READ, "hd1", &device)
@@ -189,10 +189,25 @@ rumpdisk_device_init (void)
 	  disabled = 1;
 	  return;
 	}
+#else
+
+      if (! device_open (device_master, D_READ, "ud0", &device)
+       || ! device_open (device_master, D_READ, "ud1", &device)
+       || ! device_open (device_master, D_READ, "ud2", &device)
+       || ! device_open (device_master, D_READ, "ud3", &device))
+	{
+	  device_close (device);
+	  mach_port_deallocate (mach_task_self (), device);
+	  mach_port_deallocate (mach_task_self (), device_master);
+	  fprintf(stderr, "Kernel is already driving a USB device, skipping probing " RUMP_TYPE_STRING " disks\n");
+	  fflush(stderr);
+	  disabled = 1;
+	  return;
+	}
+#endif
 
       mach_port_deallocate (mach_task_self (), device_master);
     }
-#endif
 
   rump_init ();
 }
