@@ -243,7 +243,7 @@ mkdev() {
 	if [ "$USE_PARTSTORE" ] && [ -z "$rest" ] && [ "$sliceno" ]; then
 	  st $I root 640 b /hurd/storeio -T typed part:$sliceno:device:$MASTER$dev
 	else
-	  st $I root 640 b /hurd/storeio $MASTER$I
+	  st $I root 640 b /hurd/storeio $MASTER$dev
 	fi
 	;;
 
