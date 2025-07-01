@@ -26,8 +26,11 @@ ifneq (,$(wildcard ../config.make))
  include ../config.make
 endif
 
+# TODO: install .so version of rumpvfs_nofifofs so we don't have to do this!
 ifeq ($(HAVE_LIBRUMP_VFSNOFIFO),yes)
-RUMPLIBS += rumpvfs_nofifofs
+RUMPSTATIC=-Wl,--whole-archive -lrumpvfs_nofifofs_pic -Wl,--no-whole-archive
+else
+RUMPSTATIC=
 endif
 
 dir := rumpdisk
@@ -37,19 +40,24 @@ SRCS = main.c block-rump.c
 LCLHDRS = block-rump.h ioccom-rump.h
 targets = rumpdisk rumpusbdisk
 HURDLIBS = machdev ports trivfs shouldbeinlibc iohelp ihash fshelp irqhelp
-LDLIBS += -lpthread -lpciaccess -ldl $(RUMPEXTRA:%=-l%_pic) \
-	  -Wl,--whole-archive $(RUMPLIBS:%=-l%_pic) -Wl,--no-whole-archive
+LDLIBS += -lpthread -lpciaccess -ldl -lz
 
 %.disk.o: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -D_RUMP_SATA -c $< -o $@
 rumpdisk-OBJS = $(SRCS:.c=.disk.o)
-rumpdisk-LDLIBS += -Wl,--whole-archive $(RUMPSATA:%=-l%_pic) -Wl,--no-whole-archive $(HURDLIBS:%=-l%)
+rumpdisk-LDLIBS += $(HURDLIBS:%=-l%) $(RUMPSTATIC) $(RUMPEXTRA:%=-l%) \
+		-Wl,--no-as-needed $(RUMPSATA:%=-l%) $(RUMPLIBS:%=-l%) -Wl,--as-needed
+rumpdisk.static-LDLIBS += $(HURDLIBS:%=-l%) $(RUMPSTATIC) $(RUMPEXTRA:%=-l%_pic) \
+		-Wl,--whole-archive $(RUMPSATA:%=-l%_pic) $(RUMPLIBS:%=-l%_pic) -Wl,--no-whole-archive
 rumpdisk rumpdisk.static: $(rumpdisk-OBJS)
 
 %.usb.o: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 rumpusbdisk-OBJS = $(SRCS:.c=.usb.o)
-rumpusbdisk-LDLIBS += -Wl,--whole-archive $(RUMPUSB:%=-l%_pic) -Wl,--no-whole-archive $(HURDLIBS:%=-l%)
+rumpusbdisk-LDLIBS += $(HURDLIBS:%=-l%) $(RUMPSTATIC) \
+		-Wl,--no-as-needed $(RUMPUSB:%=-l%) $(RUMPLIBS:%=-l%) -Wl,--as-needed
+rumpusbdisk.static-LDLIBS += $(HURDLIBS:%=-l%) $(RUMPSTATIC) \
+		-Wl,--whole-archive $(RUMPUSB:%=-l%_pic) $(RUMPLIBS:%=-l%_pic) -Wl,--no-whole-archive
 rumpusbdisk rumpusbdisk.static: $(rumpusbdisk-OBJS)
 
 include ../Makeconf
