@@ -156,6 +156,7 @@ rumpdisk_device_init (void)
 {
   mach_port_t device_master;
 
+#ifdef _RUMP_SATA
   if (! get_privileged_ports (&master_host, &device_master))
     {
       device_t device;
@@ -191,6 +192,8 @@ rumpdisk_device_init (void)
 
       mach_port_deallocate (mach_task_self (), device_master);
     }
+#endif
+
   rump_init ();
 }
 
