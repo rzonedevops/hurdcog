@@ -235,7 +235,7 @@ mkdev() {
 	ud*)
 	  USE_PARTSTORE=1
 	  MASTER=@/dev/usbdisk:
-	  dev=${dev/u/s}
+	  dev=s${dev#u}
 	  ;;
 	esac
 
