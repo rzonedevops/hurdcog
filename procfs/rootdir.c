@@ -84,12 +84,13 @@ get_boottime (struct ps_context *pc, struct timeval *tv)
   return err;
 }
 
-/* We get the idle time by querying the kernel's idle thread. */
+/* We get the idle time for cpu_number by querying the kernel's idle threads. */
 static error_t
-get_idletime (struct ps_context *pc, struct timeval *tv)
+get_idletime (struct ps_context *pc, struct timeval *tv, int cpu_number)
 {
   struct proc_stat *ps, *pst;
   thread_basic_info_t tbi;
+  thread_sched_info_t tsi;
   error_t err;
   int i;
 
@@ -97,7 +98,7 @@ get_idletime (struct ps_context *pc, struct timeval *tv)
   if (err)
     return err;
 
-  pst = NULL, tbi = NULL;
+  pst = NULL, tbi = NULL, tsi = NULL;
 
   err = proc_stat_set_flags (ps, PSTAT_NUM_THREADS);
   if (err || !(proc_stat_flags (ps) & PSTAT_NUM_THREADS))
@@ -106,13 +107,15 @@ get_idletime (struct ps_context *pc, struct timeval *tv)
       goto out;
     }
 
-  /* Look for the idle thread */
-  for (i=0; !tbi || !(tbi->flags & TH_FLAGS_IDLE); i++)
+  /* Look for the idle thread for cpu_number */
+  for (i=0; !tbi || !tsi
+   || !(tbi->flags & TH_FLAGS_IDLE)
+   || !(tsi->last_processor == cpu_number); i++)
     {
       if (pst)
 	_proc_stat_free (pst);
 
-      pst = NULL, tbi = NULL;
+      pst = NULL, tbi = NULL, tsi = NULL;
       if (i >= proc_stat_num_threads (ps))
 	{
 	  err = ESRCH;
@@ -128,6 +131,12 @@ get_idletime (struct ps_context *pc, struct timeval *tv)
 	continue;
 
       tbi = proc_stat_thread_basic_info (pst);
+
+      err = proc_stat_set_flags (pst, PSTAT_THREAD_SCHED);
+      if (err || ! (proc_stat_flags (pst) & PSTAT_THREAD_SCHED))
+	continue;
+
+      tsi = proc_stat_thread_sched_info (pst);
     }
 
   /* We found it! */
@@ -192,7 +201,7 @@ rootdir_gc_uptime (void *hook, char **contents, ssize_t *contents_len)
   if (err)
     return err;
 
-  err = get_idletime (hook, &idletime);
+  err = get_idletime (hook, &idletime, 0);
   if (err)
     return err;
 
@@ -216,7 +225,14 @@ rootdir_gc_stat (void *hook, char **contents, ssize_t *contents_len)
   struct timeval boottime, time, idletime;
   struct vm_statistics vmstats;
   unsigned long up_ticks, idle_ticks;
+  int i;
+  FILE *m;
+  host_basic_info_t basic;
   error_t err;
+
+  err = ps_host_basic_info (&basic);
+  if (err)
+    return EIO;
 
   err = gettimeofday (&time, NULL);
   if (err < 0)
@@ -226,7 +242,7 @@ rootdir_gc_stat (void *hook, char **contents, ssize_t *contents_len)
   if (err)
     return err;
 
-  err = get_idletime (hook, &idletime);
+  err = get_idletime (hook, &idletime, 0);
   if (err)
     return err;
 
@@ -234,22 +250,43 @@ rootdir_gc_stat (void *hook, char **contents, ssize_t *contents_len)
   if (err)
     return EIO;
 
+  m = open_memstream (contents, (size_t *) contents_len);
+  if (m == NULL)
+    {
+      err = ENOMEM;
+      goto out;
+    }
+
   timersub (&time, &boottime, &time);
   up_ticks = opt_clk_tck * (time.tv_sec * 1000000. + time.tv_usec) / 1000000.;
   idle_ticks = opt_clk_tck * (idletime.tv_sec * 1000000. + idletime.tv_usec) / 1000000.;
 
-  *contents_len = asprintf (contents,
+  fprintf (m,
       "cpu  %lu 0 0 %lu 0 0 0 0 0\n"
-      "cpu0 %lu 0 0 %lu 0 0 0 0 0\n"
+      "cpu0 %lu 0 0 %lu 0 0 0 0 0\n",
+      up_ticks - idle_ticks, idle_ticks,
+      up_ticks - idle_ticks, idle_ticks);
+
+  for (i = 1; i < basic->avail_cpus; i++)
+    {
+      err = get_idletime (hook, &idletime, i);
+      idle_ticks = opt_clk_tck * (idletime.tv_sec * 1000000. + idletime.tv_usec) / 1000000.;
+      fprintf (m,
+          "cpu%d %lu 0 0 %lu 0 0 0 0 0\n",
+          i, up_ticks - idle_ticks, idle_ticks);
+    }
+
+  fprintf (m,
       "intr 0\n"
       "page %d %d\n"
       "btime %lu\n",
-      up_ticks - idle_ticks, idle_ticks,
-      up_ticks - idle_ticks, idle_ticks,
       vmstats.pageins, vmstats.pageouts,
       boottime.tv_sec);
 
-  return 0;
+ out:
+  if (m)
+    fclose (m);
+  return err;
 }
 
 static error_t
