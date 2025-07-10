@@ -453,6 +453,10 @@ xdr_decode_fattr (int *p, struct stat *st)
       p++;
       st->st_blocks = ntohl (*p);
       p++;
+      st->st_fsid = ntohl (*p);
+      p++;
+      st->st_ino = ntohl (*p);
+      p++;
     }
   else
     {
@@ -468,11 +472,9 @@ xdr_decode_fattr (int *p, struct stat *st)
       minor = ntohl (*p);
       p++;
       st->st_rdev = gnu_dev_makedev (major, minor);
+      p = xdr_decode_64bit(p, &st->st_fsid);
+      p = xdr_decode_64bit(p, &st->st_ino);
     }
-  st->st_fsid = ntohl (*p);
-  p++;
-  st->st_ino = ntohl (*p);
-  p++;
   st->st_atim.tv_sec = ntohl (*p);
   p++;
   st->st_atim.tv_nsec = ntohl (*p);
