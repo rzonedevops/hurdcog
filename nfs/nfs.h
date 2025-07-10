@@ -171,9 +171,11 @@ int *xdr_encode_sattr_size (int *, off_t);
 int *xdr_encode_sattr_times (int *, const struct timespec *, const struct timespec *);
 int *xdr_encode_sattr_stat (int *, const struct stat *);
 int *xdr_encode_create_state (int *, mode_t, uid_t);
+int *xdr_encode_64bit (int *p, uint64_t n);
 int *xdr_decode_fattr (int *, struct stat *);
 int *xdr_decode_string (int *, char *);
 int *xdr_decode_fhandle (int *, struct node **);
+int *xdr_decode_64bit (int *p, uint64_t *n);
 int *nfs_initialize_rpc (int, struct iouser *, size_t, void **,
 			 struct node *, uid_t);
 error_t nfs_error_trans (int);

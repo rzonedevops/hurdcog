@@ -163,11 +163,11 @@ xdr_encode_data (int *p, const char *data, size_t len)
   return p + nints;
 }
 
-/* Encode a 64 bit integer.  */
+/* Encode a 64 bit unsigned integer.  */
 int *
-xdr_encode_64bit (int *p, long long n)
+xdr_encode_64bit (int *p, uint64_t n)
 {
-  *(p++) = htonl (n & 0xffffffff00000000LL >> 32);
+  *(p++) = htonl ((n & 0xffffffff00000000ULL) >> 32);
   *(p++) = htonl (n & 0xffffffff);
   return p;
 }
@@ -391,12 +391,12 @@ xdr_encode_sattr_stat (int *p,
 }
 
 
-/* Decode *P into a long long; return the address of the following
+/* Decode *P into a uint64_t; return the address of the following
    data.  */
 int *
-xdr_decode_64bit (int *p, long long *n)
+xdr_decode_64bit (int *p, uint64_t *n)
 {
-  long long high, low;
+  uint64_t high, low;
   high = ntohl (*p);
   p++;
   low = ntohl (*p);
@@ -456,7 +456,7 @@ xdr_decode_fattr (int *p, struct stat *st)
     }
   else
     {
-      long long size;
+      uint64_t size;
       int major, minor;
       p = xdr_decode_64bit (p, &size);
       st->st_size = size;
