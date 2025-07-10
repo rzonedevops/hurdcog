@@ -537,12 +537,17 @@ netfs_attempt_write (struct iouser *cred, struct node *np,
 
       p = xdr_encode_fhandle (p, &np->nn->handle);
       if (protocol_version == 2)
+      {
 	*(p++) = 0;
-      *(p++) = htonl (offset);
-      if (protocol_version == 2)
+	*(p++) = htonl (offset);
 	*(p++) = 0;
-      if (protocol_version == 3)
+      }
+      else
+      {
+	p = xdr_encode_64bit(p, offset);
+	*(p++) = htonl (thisamt);
 	*(p++) = htonl (FILE_SYNC);
+      }
       p = xdr_encode_data (p, data, thisamt);
 
       err = conduct_rpc (&rpcbuf, &p);
