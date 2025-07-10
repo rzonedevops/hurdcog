@@ -124,9 +124,9 @@ process_wcc_stat (struct node *np, int *p, int mod)
       if (attrs_exist)
 	{
 	  /* Just skip them for now */
-	  p += 2 * sizeof (int); /* size */
-	  p += 2 * sizeof (int); /* mtime */
-	  p += 2 * sizeof (int); /* atime */
+	  p += 2; /* size */
+	  p += 2; /* mtime */
+	  p += 2; /* atime */
 	}
 
       /* Now the post_op_attr */
