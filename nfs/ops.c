@@ -1702,7 +1702,6 @@ fetch_directory (struct iouser *cred, struct node *dir,
 		 void **bufp, size_t *bufsizep, int *totalentries)
 {
   void *buf;
-  int cookie;
   int *p;
   void *rpcbuf;
   struct dirent *entry;
@@ -1712,6 +1711,12 @@ fetch_directory (struct iouser *cred, struct node *dir,
   error_t err;
   int isnext;
 
+  /* Treat all cookies as opaque data of the appropriate size */
+  char cookieverf[NFS3_COOKIEVERFSIZE];
+  char cookie[NFS_MAXCOOKIESIZE];
+  const unsigned int cookie_size =
+    (protocol_version == 2 ? NFS2_COOKIESIZE : NFS3_COOKIESIZE);
+
   bufmalloced = read_size;
 
   buf = malloc (bufmalloced);
@@ -1719,7 +1724,9 @@ fetch_directory (struct iouser *cred, struct node *dir,
     return ENOMEM;
 
   bp = buf;
-  cookie = 0;
+  memset (cookie, 0, cookie_size);
+  if (protocol_version == 3)
+    memset (cookieverf, 0, sizeof (cookieverf));
   eof = 0;
   *totalentries = 0;
 
@@ -1735,18 +1742,42 @@ fetch_directory (struct iouser *cred, struct node *dir,
 	}
 
       p = xdr_encode_fhandle (p, &dir->nn->handle);
-      *(p++) = cookie;
+      memcpy (p, cookie, cookie_size);
+      p += INTSIZE (cookie_size);
+
+      if (protocol_version == 3)
+	{
+	  memcpy (p, cookieverf, sizeof (cookieverf));
+	  p += INTSIZE (sizeof (cookieverf));
+	}
+
       *(p++) = ntohl (read_size);
       err = conduct_rpc (&rpcbuf, &p);
-      if (!err)
-	{
-	  err = nfs_error_trans (ntohl (*p));
-	  p++;
-	}
       if (err)
 	{
+	  free (rpcbuf);
 	  free (buf);
 	  return err;
+	}
+
+      err = nfs_error_trans (ntohl (*p));
+      p++;
+
+      if (protocol_version == 3)
+	/* 'post_op_attr' is present for any value of 'err' */
+	p = process_returned_stat (dir, p, 1);
+
+      if (err)
+	{
+	  free (rpcbuf);
+	  free (buf);
+	  return err;
+	}
+
+      if (protocol_version == 3)
+	{
+	  memcpy (cookieverf, p, sizeof (cookieverf));
+	  p += INTSIZE (sizeof (cookieverf));
 	}
 
       isnext = ntohl (*p);
@@ -1759,8 +1790,14 @@ fetch_directory (struct iouser *cred, struct node *dir,
 	  int namlen;
 	  int reclen;
 
-	  fileno = ntohl (*p);
-	  p++;
+	  if (protocol_version == 2)
+	    {
+	      fileno = ntohl (*p);
+	      p++;
+	    }
+	  else
+	      p = xdr_decode_64bit(p, &fileno);
+
 	  namlen = ntohl (*p);
 	  p++;
 
@@ -1795,7 +1832,8 @@ fetch_directory (struct iouser *cred, struct node *dir,
 
 	  ++*totalentries;
 
-	  cookie = *(p++);
+	  memcpy (cookie, p, cookie_size);
+	  p += INTSIZE (cookie_size);
 	  isnext = ntohl (*p);
 	  p++;
 	}
