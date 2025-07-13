@@ -1286,37 +1286,36 @@ netfs_attempt_create_file (struct iouser *cred, struct node *np,
     p = xdr_encode_create_state (p, mode, owner);
 
   err = conduct_rpc (&rpcbuf, &p);
-
-  pthread_mutex_unlock (&np->lock);
+  *newnp = 0;
 
   if (!err)
     {
-      err = nfs_error_trans (ntohl (*p));
-      p++;
-      if (!err)
+      if (protocol_version == 2)
 	{
-	  p = xdr_decode_fhandle (p, newnp);
-	  p = process_returned_stat (*newnp, p, 1);
+	  err = nfs_error_trans (ntohl (*p));
+	  p++;
+	  if (!err)
+	    {
+	      p = xdr_decode_fhandle (p, newnp);
+	      p = process_returned_stat (*newnp, p, 1);
+	    }
 	}
-      if (err)
-	*newnp = 0;
-      if (protocol_version == 3)
-	{
-	  if (*newnp)
-	    pthread_mutex_unlock (&(*newnp)->lock);
-	  pthread_mutex_lock (&np->lock);
-	  p = process_wcc_stat (np, p, 1);
-	  pthread_mutex_unlock (&np->lock);
-	  if (*newnp)
-	    pthread_mutex_lock (&(*newnp)->lock);
-	}
+      else
+	err = process_create_reply (cred, np, name, newnp, p);
 
-      if (*newnp && !netfs_validate_stat (*newnp, (struct iouser *) -1)
-	  && (*newnp)->nn_stat.st_uid != owner)
-	netfs_attempt_chown ((struct iouser *) -1, *newnp, owner, (*newnp)->nn_stat.st_gid);
+      pthread_mutex_unlock (&np->lock);
+
+      if (*newnp && !netfs_validate_stat (*newnp, (struct iouser *) -1))
+	{
+	  if ((*newnp)->nn_stat.st_uid != owner)
+	    err = netfs_attempt_chown ((struct iouser *) -1, *newnp, owner, (*newnp)->nn_stat.st_gid);
+
+	  if (!err && (*newnp)->nn_stat.st_mode != mode)
+	    err = netfs_attempt_chmod (cred, *newnp, mode);
+	}
     }
   else
-    *newnp = 0;
+    pthread_mutex_unlock (&np->lock);
 
   free (rpcbuf);
   return err;
