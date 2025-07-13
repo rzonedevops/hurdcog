@@ -134,6 +134,70 @@ process_wcc_stat (struct node *np, int *p, int mod)
     }
 }
 
+/* advance the reply buffer beyond the 'post_op_attr' (v3) or
+   'fattr' (v2). Populating 'struct stat' for the purposes of
+   advancing the correct number of bytes might seem wasteful
+   but it is not expected that this function will be called
+   often. */
+static int *
+skip_returned_stat (int *p)
+{
+  struct stat st;
+
+  if (protocol_version == 2)
+    return xdr_decode_fattr (p, &st);
+
+  int attrs_exist = ntohl (*p);
+  p++;
+
+  return (attrs_exist ? xdr_decode_fattr (p, &st) : p);
+}
+
+/* The reply to CREATE, MKDIR, SYMLINK and MKNOD in v3 all have
+   the same reply content. It is expected that 'np' is supplied
+   locked and any 'newnp' is also returned locked. */
+static error_t
+process_create_reply (struct iouser *cred,
+		      struct node *np,
+		      const char* name,
+		      struct node **newnp,
+		      int *p)
+{
+  assert_backtrace (protocol_version == 3);
+
+  error_t err = nfs_error_trans (ntohl (*p));
+  p++;
+
+  if (!err)
+    {
+      int handle_follows = ntohl (*p);
+      p++;
+
+      if (handle_follows)
+	{
+	  p = xdr_decode_fhandle (p, newnp);
+	  p = process_returned_stat (*newnp, p, 1);
+	}
+      else
+	/* These will be refetched in LOOKUP */
+	p = skip_returned_stat (p);
+
+      p = process_wcc_stat (np, p, 1);
+
+      if (!handle_follows)
+      {
+	err = netfs_attempt_lookup (cred, np, name, newnp);
+	/* netfs_attempt_lookup always unlocks 'np' so... */
+	pthread_mutex_lock (&np->lock);
+      }
+    }
+  else
+    {
+      p = process_wcc_stat (np, p, 1);
+    }
+
+  return err;
+}
 
 /* Implement the netfs_validate_stat callback as described in
    <hurd/netfs.h>.  */
@@ -740,15 +804,23 @@ netfs_attempt_mkdir (struct iouser *cred, struct node *np,
   err = conduct_rpc (&rpcbuf, &p);
   if (!err)
     {
-      err = nfs_error_trans (ntohl (*p));
-      p++;
+      if (protocol_version == 2)
+	{
+	  err = nfs_error_trans (ntohl (*p));
+	  p++;
+
+	  if (!err)
+	    {
+	      p = xdr_decode_fhandle (p, &newnp);
+	      p = process_returned_stat (newnp, p, 1);
+	    }
+	}
+      else
+	err = process_create_reply (cred, np, name, &newnp, p);
     }
 
   if (!err)
     {
-      p = xdr_decode_fhandle (p, &newnp);
-      p = process_returned_stat (newnp, p, 1);
-
       /* Did we set the owner correctly?  If not, try, but ignore failures. */
       if (!netfs_validate_stat (newnp, (struct iouser *) -1)
           && newnp->nn_stat.st_uid != owner)
