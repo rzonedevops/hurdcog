@@ -1251,8 +1251,10 @@ netfs_attempt_create_file (struct iouser *cred, struct node *np,
 
   p = nfs_initialize_rpc (NFSPROC_CREATE (protocol_version),
 			  cred, 0, &rpcbuf, np, -1);
-  if (! p)
+  if (! p) {
+    pthread_mutex_unlock (&np->lock);
     return errno;
+  }
 
   p = xdr_encode_fhandle (p, &np->nn->handle);
   p = xdr_encode_string (p, name);
