@@ -189,7 +189,7 @@ mkdev() {
 	st $I root 660 c /hurd/rumpusbdisk
 	cmd ln -f -s rumpusbdisk usbdisk
 	;;
-      [hrscwu]d*)
+      [hrscwu]d*|ucd*)
 	local sliceno=
         local n="${I#?d}"
 	local major="${n%%[!0-9]*}"
@@ -231,6 +231,11 @@ mkdev() {
 	wd*|cd*)
 	  USE_PARTSTORE=1
 	  MASTER=@/dev/disk:
+	  ;;
+	ucd*)
+	  USE_PARTSTORE=1
+	  MASTER=@/dev/usbdisk:
+	  dev=${dev#u}
 	  ;;
 	ud*)
 	  USE_PARTSTORE=1
