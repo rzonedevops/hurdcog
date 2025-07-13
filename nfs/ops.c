@@ -526,10 +526,17 @@ netfs_attempt_read (struct iouser *cred, struct node *np,
         return errno;
 
       p = xdr_encode_fhandle (p, &np->nn->handle);
-      *(p++) = htonl (offset);
-      *(p++) = htonl (thisamt);
       if (protocol_version == 2)
-	*(p++) = 0;
+	{
+	  *(p++) = htonl (offset);
+	  *(p++) = htonl (thisamt);
+	  *(p++) = 0;
+	}
+      else
+	{
+	  p = xdr_encode_64bit (p, offset);
+	  *(p++) = htonl (thisamt);
+	}
 
       err = conduct_rpc (&rpcbuf, &p);
       if (!err)
@@ -553,8 +560,15 @@ netfs_attempt_read (struct iouser *cred, struct node *np,
 
 	  if (protocol_version == 3)
 	    {
+	      size_t opaque_data_len;
+
 	      eof = ntohl (*p);
 	      p++;
+	      opaque_data_len = ntohl (*p++);
+
+	      /* opaque_len should surely equal trans_len, however... */
+	      if (opaque_data_len < trans_len)
+		trans_len = opaque_data_len;
 	    }
 	  else
 	    eof = (trans_len < thisamt);
