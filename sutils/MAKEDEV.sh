@@ -225,7 +225,7 @@ mkdev() {
 	  ;;
 	esac
 
-	dev=${I%s[0-9]*}
+	dev=$I
 
 	case "$I" in
 	wd*|cd*)
@@ -246,7 +246,8 @@ mkdev() {
 
 	# The device name passed all syntax checks, so finally use it!
 	if [ "$USE_PARTSTORE" ] && [ -z "$rest" ] && [ "$sliceno" ]; then
-	  st $I root 640 b /hurd/storeio -T typed part:$sliceno:device:$MASTER$dev
+	  local drive=${dev%s[0-9]*}
+	  st $I root 640 b /hurd/storeio -T typed part:$sliceno:device:$MASTER$drive
 	else
 	  st $I root 640 b /hurd/storeio $MASTER$dev
 	fi
