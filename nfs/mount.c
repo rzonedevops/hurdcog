@@ -102,6 +102,7 @@ mount_root (char *name, char *host)
   void *rpcbuf;
   int port;
   error_t err;
+  struct fhandle mount_fhandle;
   struct node *np;
   short pmapport;
 
@@ -110,13 +111,7 @@ mount_root (char *name, char *host)
     {
       struct servent *s;
 
-      /* XXX This will always fail! pmap_service_name will always be "sunrpc"
-         What should pmap_service_name really be?  By definition the second
-	 argument is either "tcp" or "udp"  Thus, is this backwards
-	 (as service_name suggests)?  If so, should it read:
-             s = getservbyname (pmap_service_name, "udp");
-         or is there something I am missing here?  */
-      s = getservbyname ("sunrpc", pmap_service_name);
+      s = getservbyname (pmap_service_name, "udp");
       if (s)
 	pmapport = s->s_port;
       else
