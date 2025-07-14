@@ -197,7 +197,7 @@ static const struct argp_option startup_options[] = {
      "Port for nfs operations"},
   {"default-nfs-port",      OPT_NFS_PORT_D,"PORT", 0,
      "Port for nfs operations, if none can be found automatically"},
-  {"nfs-program",           OPT_NFS_PROG,  "ID[.VERS]"},
+  {"nfs-program",           OPT_NFS_PROG,  "[ID.]VERS"},
 
   {"pmap-port",             OPT_PMAP_PORT,  "SVC|PORT"},
 
@@ -336,6 +336,30 @@ parse_startup_opt (int key, char *arg, struct argp_state *state)
       /* fall through */
     case OPT_NFS_PORT_D:
       nfs_port = atoi (arg);
+      break;
+
+    case OPT_NFS_PROG:
+      {
+	const char* version = strrchr (arg, '.');
+	const char* program = NULL;
+
+	if (version != NULL)
+	  {
+	    program = arg;
+	    version++;
+	  }
+	else
+	    version = arg;
+
+	nfs_version = atoi (version);
+	if (program)
+	  nfs_program = atoi (program);
+
+	if (nfs_version < 2 || nfs_version > 3)
+	  argp_error (state, "Invalid NFS version: %d", nfs_version);
+
+	protocol_version = nfs_version;
+      }
       break;
 
     case ARGP_KEY_ARG:
