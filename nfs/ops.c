@@ -1627,9 +1627,8 @@ netfs_report_access (struct iouser *cred,
 	{
 	  err = nfs_error_trans (ntohl (*p));
 	  p++;
-	  p = process_returned_stat (np, p, 0);   /* XXX Should this be
-						     protected by the
-						     if (!err) ? */
+	  p = process_returned_stat (np, p, 0);
+
 	  if (!err)
 	    {
 	      ret = ntohl (*p);
