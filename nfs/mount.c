@@ -231,8 +231,8 @@ mount_root (char *name, char *host)
 	  error (0, errno, "rpc");
 	  goto error_with_rpcbuf;
 	}
-      *(p++) = htonl (NFS_PROGRAM);
-      *(p++) = htonl (NFS_VERSION);
+      *(p++) = htonl (nfs_program);
+      *(p++) = htonl (nfs_version);
       *(p++) = htonl (IPPROTO_UDP);
       *(p++) = htonl (0);
       err = conduct_rpc (&rpcbuf, &p);

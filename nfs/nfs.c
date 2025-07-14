@@ -608,7 +608,7 @@ nfs_initialize_rpc (int rpc_proc, struct iouser *cred,
   else
     uid = gid = second_gid = -1;
 
-  return initialize_rpc (NFS_PROGRAM, NFS_VERSION, rpc_proc, len, bufp,
+  return initialize_rpc (nfs_program, nfs_version, rpc_proc, len, bufp,
 			 uid, gid, second_gid);
 }
 
