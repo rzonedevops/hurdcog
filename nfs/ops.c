@@ -1453,6 +1453,7 @@ netfs_attempt_rename (struct iouser *cred, struct node *fromdir,
       if (err)
 	return err;
 
+      pthread_mutex_unlock(&np->lock);
       err = netfs_attempt_link (cred, todir, np, toname, 1);
       netfs_nput (np);
       if (err)
