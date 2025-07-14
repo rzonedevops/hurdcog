@@ -439,11 +439,9 @@ netfs_attempt_set_size (struct iouser *cred, struct node *np,
   return err;
 }
 
-/* Implement the netfs_attempt_statfs callback as described in
-   <hurd/netfs.h>. */
-error_t
-netfs_attempt_statfs (struct iouser *cred, struct node *np,
-		      struct statfs *st)
+static error_t
+netfs_attempt_statfs_v2 (struct iouser *cred, struct node *np,
+			 struct statfs *st)
 {
   int *p;
   void *rpcbuf;
@@ -482,6 +480,68 @@ netfs_attempt_statfs (struct iouser *cred, struct node *np,
 
   free (rpcbuf);
   return err;
+}
+
+static error_t
+netfs_attempt_statfs_v3 (struct iouser *cred, struct node *np,
+			 struct statfs *st)
+{
+  int *p;
+  void *rpcbuf;
+  error_t err;
+
+  p = nfs_initialize_rpc (NFS3PROC_FSSTAT, cred, 0, &rpcbuf, np, -1);
+  if (! p)
+    return errno;
+
+  p = xdr_encode_fhandle (p, &np->nn->handle);
+
+  err = conduct_rpc (&rpcbuf, &p);
+  if (!err)
+    {
+      err = nfs_error_trans (ntohl (*p++));
+      p = process_returned_stat (np, p, 1);
+
+      if (!err)
+	{
+	  /* NFS V3 does not support the concept of blocks */
+	  st->f_bsize = 1;
+
+	  /* uint64t FSSTAT3resok.tbytes */
+	  p = xdr_decode_64bit(p, &st->f_blocks);
+	  /* uint64t FSSTAT3resok.fbytes */
+	  p = xdr_decode_64bit(p, &st->f_bfree);
+	  /* uint64t FSSTAT3resok.abytes */
+	  p = xdr_decode_64bit(p, &st->f_bavail);
+	  /* uint64t FSSTAT3resok.tfiles */
+	  p = xdr_decode_64bit(p, &st->f_files);
+	  /* uint64t FSSTAT3resok.ffiles */
+	  p = xdr_decode_64bit(p, &st->f_ffree);
+
+	  /* No need to decode the reply further */
+	  /* uint64t FSSTAT3resok.afiles */
+	  /* uint32 FSSTAT3resok.invarsec */
+
+	  st->f_type = FSTYPE_NFS;
+	  st->f_fsid = getpid ();
+
+	  st->f_namelen = 0;
+	}
+    }
+
+  free (rpcbuf);
+  return err;
+}
+
+/* Implement the netfs_attempt_statfs callback as described in
+   <hurd/netfs.h>. */
+error_t
+netfs_attempt_statfs (struct iouser *cred, struct node *np,
+		      struct statfs *st)
+{
+  return (protocol_version == 2
+	  ? netfs_attempt_statfs_v2 (cred, np, st)
+	  : netfs_attempt_statfs_v3 (cred, np, st));
 }
 
 /* Implement the netfs_attempt_sync callback as described in
