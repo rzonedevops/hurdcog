@@ -378,12 +378,16 @@ main (int argc, char **argv)
   struct sockaddr_in addr;
   int ret;
 
-  argp_parse (&argp, argc, argv, 0, 0, 0);
-    
+  err = argp_parse (&argp, argc, argv, 0, 0, 0);
+  if (err)
+    error (1, err, "Invalid command line");
+
   task_get_bootstrap_port (mach_task_self (), &bootstrap);
   netfs_init ();
   
-  main_udp_socket = socket (PF_INET, SOCK_DGRAM, 0);
+  if ((main_udp_socket = socket (PF_INET, SOCK_DGRAM, 0)) == -1)
+    error(1, errno, "Socket failed");
+
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = INADDR_ANY;
   addr.sin_port = htons (IPPORT_RESERVED);
