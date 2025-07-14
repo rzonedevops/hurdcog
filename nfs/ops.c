@@ -1504,7 +1504,10 @@ netfs_attempt_rename (struct iouser *cred, struct node *fromdir,
 	{
 	  pthread_mutex_lock (&fromdir->lock);
 	  p = process_wcc_stat (fromdir, p, !err);
+	  pthread_mutex_unlock (&fromdir->lock);
+	  pthread_mutex_lock (&todir->lock);
 	  p = process_wcc_stat (todir, p, !err);
+	  pthread_mutex_unlock (&todir->lock);
 	}
     }
 
