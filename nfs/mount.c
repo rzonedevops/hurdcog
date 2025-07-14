@@ -207,10 +207,9 @@ mount_root (char *name, char *host)
       goto error_with_rpcbuf;
     }
 
-  /* Create the node for root */
-  xdr_decode_fhandle (p, &np);
+  mount_fhandle.size = NFS2_FHSIZE;
+  memcpy(&mount_fhandle.data, p, mount_fhandle.size);
   free (rpcbuf);
-  pthread_mutex_unlock (&np->lock);
 
   if (nfs_port_override)
     port = nfs_port;
@@ -262,7 +261,47 @@ mount_root (char *name, char *host)
   mounted_hostname = host;
   mounted_nfs_port = port;
 
-  return np;
+  /* The handle returned by the mount server is always NFS2_FHSIZE.
+     The handle on NFSv3 can be larger. An NFS server lookup for
+     the root node succeeds with the handle from the mount server
+     but a longer handle is returned as the true identity. This is
+     the one that must be maintained by the root node.
+     So refetch it here... */
+  p = initialize_rpc(nfs_program,
+		     nfs_version,
+		     NFSPROC_LOOKUP (protocol_version),
+		     0, &rpcbuf,
+		     0, 0, -1);
+  if (! p)
+    {
+      error (0, errno, "rpc");
+      goto error_with_rpcbuf;
+    }
+
+  p = xdr_encode_fhandle(p, &mount_fhandle);
+  p = xdr_encode_string (p, ".");
+
+  err = conduct_rpc (&rpcbuf, &p);
+
+  if (!err) {
+      err = nfs_error_trans (ntohl (*p));
+      p++;
+  }
+  else
+    {
+      error (0, errno, "rpc");
+      goto error_with_rpcbuf;
+    }
+
+  if (!err)
+    {
+      /* Create the node for root */
+      xdr_decode_fhandle (p, &np);
+      pthread_mutex_unlock (&np->lock);
+      free(rpcbuf);
+
+      return np;
+    }
 
 error_with_rpcbuf:
   free (rpcbuf);
