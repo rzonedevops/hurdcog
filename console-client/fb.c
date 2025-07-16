@@ -131,10 +131,12 @@ fb_get_multiboot_params (void)
 
   memcpy((void *)&mbi, (void *)bufptr, sizeof(struct multiboot_raw_info));
 
-  fb_ptr = mbi.fb_info.framebuffer_addr;
-  fb_type = mbi.fb_info.framebuffer_type;
   fb_width = mbi.fb_info.framebuffer_width;
   fb_height = mbi.fb_info.framebuffer_height;
+  if (fb_width == 0 || fb_height == 0)
+    goto fail;
+  fb_ptr = mbi.fb_info.framebuffer_addr;
+  fb_type = mbi.fb_info.framebuffer_type;
   fb_bpp = mbi.fb_info.framebuffer_bpp;
   fb_wc = FONT_PIXELS_W;
   fb_hc = FONT_PIXELS_H;
