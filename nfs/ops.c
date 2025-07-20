@@ -1056,8 +1056,6 @@ netfs_attempt_link (struct iouser *cred, struct node *dir,
 	}
       pthread_mutex_unlock (&np->lock);
 
-      pthread_mutex_lock (&dir->lock);
-
       purge_lookup_cache (dir, name, strlen (name));
       err = conduct_rpc (&rpcbuf, &p);
       if (!err)
@@ -1068,6 +1066,7 @@ netfs_attempt_link (struct iouser *cred, struct node *dir,
 	  if (protocol_version == 2 && !err)
 	    {
 	      free (rpcbuf);
+	      pthread_mutex_lock (&dir->lock);
 
 	      /* NFSPROC_SYMLINK stupidly does not pass back an
 		 fhandle, so we have to fetch one now. */
@@ -1101,23 +1100,14 @@ netfs_attempt_link (struct iouser *cred, struct node *dir,
 	    }
 	  else if (protocol_version == 3)
 	    {
-	      if (!err)
-		{
-		  pthread_mutex_unlock (&dir->lock);
-		  pthread_mutex_lock (&np->lock);
-		  p = recache_handle (p, np);
-		  p = process_returned_stat (np, p, 1);
-		  pthread_mutex_unlock (&np->lock);
-		  pthread_mutex_lock (&dir->lock);
-		}
-	      p = process_wcc_stat (dir, p, !err);
-	      pthread_mutex_unlock (&dir->lock);
+	      /* process_create_reply needs the start of the buffer */
+	      p--;
+
+	      pthread_mutex_lock (&np->lock);
+	      err = process_create_reply (cred, dir, name, &np, p);
+	      pthread_mutex_unlock (&np->lock);
 	    }
-	  else
-	    pthread_mutex_unlock (&dir->lock);
 	}
-      else
-	pthread_mutex_unlock (&dir->lock);
 
       free (rpcbuf);
       break;
@@ -1213,19 +1203,9 @@ netfs_attempt_link (struct iouser *cred, struct node *dir,
 	  err = conduct_rpc (&rpcbuf, &p);
 	  if (!err)
 	    {
-	      err = nfs_error_trans (ntohl (*p));
-	      p++;
-
-	      if (!err)
-		{
-		  pthread_mutex_lock (&np->lock);
-		  p = recache_handle (p, np);
-		  p = process_returned_stat (np, p, 1);
-		  pthread_mutex_unlock (&np->lock);
-		}
-	      pthread_mutex_lock (&dir->lock);
-	      p = process_wcc_stat (dir, p, !err);
-	      pthread_mutex_unlock (&dir->lock);
+	      pthread_mutex_lock (&np->lock);
+	      err = process_create_reply (cred, dir, name, &np, p);
+	      pthread_mutex_unlock (&np->lock);
 	    }
 	  free (rpcbuf);
 	}
@@ -1381,13 +1361,15 @@ netfs_attempt_create_file (struct iouser *cred, struct node *np,
       else
 	err = process_create_reply (cred, np, name, newnp, p);
 
-      if (*newnp && !netfs_validate_stat (*newnp, (struct iouser *) -1))
+      if (protocol_version == 3 && !err)
 	{
-	  if ((*newnp)->nn_stat.st_uid != owner)
-	    err = netfs_attempt_chown ((struct iouser *) -1, *newnp, owner, (*newnp)->nn_stat.st_gid);
+	  int *_cs_sattr_encoder (int * sp)
+	  {
+	    return xdr_encode_create_state (sp, mode, owner);
+	  }
 
-	  if (!err && (*newnp)->nn_stat.st_mode != mode)
-	    err = netfs_attempt_chmod (cred, *newnp, mode);
+	  err = nfs_setattr_rpc(cred, *newnp, -1, _cs_sattr_encoder);
+	  /* Unlink *newnp if err ? */
 	}
     }
 

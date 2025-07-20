@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <netinet/in.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <sys/sysmacros.h>
 
@@ -177,6 +178,30 @@ int *
 xdr_encode_string (int *p, const char *string)
 {
   return xdr_encode_data (p, string, strlen (string));
+}
+
+/* Some NFSv3 rpcs can fail if the file size field
+   is set within the set attributes unnecessarily. */
+static inline bool
+nfs_sattr3_size_needed(mode_t mode, size_t sz)
+{
+  if (sz == 0)
+    {
+      switch (hurd_mode_to_nfs_type (mode))
+	{
+	case NFSOCK:
+	case NF3FIFO:
+	  /* NFCHR and NFBLK probaly also fall into this
+	     category but as unable to check then leave
+	     those alone. */
+	  return false;
+
+	default:
+	  break;
+	}
+    }
+
+  return true;
 }
 
 /* Encode a MODE into an otherwise empty sattr.  */
@@ -372,14 +397,17 @@ xdr_encode_sattr_stat (int *p,
     }
   else
     {
+      bool needs_size = nfs_sattr3_size_needed (st->st_mode, st->st_size);
+
       *(p++) = htonl (1);		/* set mode */
       *(p++) = htonl (hurd_mode_to_nfs_mode (st->st_mode));
       *(p++) = htonl (1);		/* set uid */
       *(p++) = htonl (st->st_uid);
       *(p++) = htonl (1);		/* set gid */
       *(p++) = htonl (st->st_gid);
-      *(p++) = htonl (1);		/* set size */
-      p = xdr_encode_64bit (p, st->st_size);
+      *(p++) = htonl (needs_size);	/* set size */
+      if (needs_size)
+	p = xdr_encode_64bit (p, st->st_size);
       *(p++) = htonl (SET_TO_CLIENT_TIME); /* set atime */
       *(p++) = htonl (st->st_atim.tv_sec);
       *(p++) = htonl (st->st_atim.tv_nsec);
