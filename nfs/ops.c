@@ -231,11 +231,11 @@ netfs_validate_stat (struct node *np, struct iouser *cred)
   return err;
 }
 
-/* Implement the netfs_attempt_chown callback as described in
-   <hurd/netfs.h>.  */
-error_t
-netfs_attempt_chown (struct iouser *cred, struct node *np,
-		     uid_t uid, gid_t gid)
+/* Generalised implementation of PROC_SETATTR rpc call requiring
+   only a localised sattr encoding function for each caller. */
+static error_t
+nfs_setattr_rpc (struct iouser *cred, struct node *np, gid_t gid,
+		 int *(sattr_encoder) (int *))
 {
   int *p;
   void *rpcbuf;
@@ -247,7 +247,7 @@ netfs_attempt_chown (struct iouser *cred, struct node *np,
     return errno;
 
   p = xdr_encode_fhandle (p, &np->nn->handle);
-  p = xdr_encode_sattr_ids (p, uid, gid);
+  p = (sattr_encoder) (p);
   if (protocol_version == 3)
     *(p++) = 0;			/* guard_check == 0 */
 
@@ -265,6 +265,20 @@ netfs_attempt_chown (struct iouser *cred, struct node *np,
   return err;
 }
 
+/* Implement the netfs_attempt_chown callback as described in
+   <hurd/netfs.h>.  */
+error_t
+netfs_attempt_chown (struct iouser *cred, struct node *np,
+		     uid_t uid, gid_t gid)
+{
+  int *_chown_sattr_encoder (int *p)
+  {
+    return xdr_encode_sattr_ids (p, uid, gid);
+  }
+
+  return nfs_setattr_rpc (cred, np, gid, _chown_sattr_encoder);
+}
+
 /* Implement the netfs_attempt_chauthor callback as described in
    <hurd/netfs.h>.  */
 error_t
@@ -280,13 +294,9 @@ error_t
 netfs_attempt_chmod (struct iouser *cred, struct node *np,
 		     mode_t mode)
 {
-  int *p;
-  void *rpcbuf;
-  error_t err;
-
   if ((mode & S_IFMT) != 0)
     {
-      err = netfs_validate_stat (np, cred);
+      error_t err = netfs_validate_stat (np, cred);
       if (err)
 	return err;
 
@@ -321,27 +331,12 @@ netfs_attempt_chmod (struct iouser *cred, struct node *np,
 	}
     }
 
-  p = nfs_initialize_rpc (NFSPROC_SETATTR (protocol_version),
-			  cred, 0, &rpcbuf, np, -1);
-  if (! p)
-    return errno;
+  int *_chmod_sattr_encoder (int *p)
+  {
+    return xdr_encode_sattr_mode (p, mode);
+  }
 
-  p = xdr_encode_fhandle (p, &np->nn->handle);
-  p = xdr_encode_sattr_mode (p, mode);
-  if (protocol_version == 3)
-    *(p++) = 0;			/* guard check == 0 */
-
-  err = conduct_rpc (&rpcbuf, &p);
-  if (!err)
-    {
-      err = nfs_error_trans (ntohl (*p));
-      p++;
-      if (!err || protocol_version == 3)
-	p = process_wcc_stat (np, p, !err);
-    }
-
-  free (rpcbuf);
-  return err;
+  return nfs_setattr_rpc (cred, np, -1, _chmod_sattr_encoder);
 }
 
 /* Implement the netfs_attempt_chflags callback as described in
@@ -359,37 +354,18 @@ error_t
 netfs_attempt_utimes (struct iouser *cred, struct node *np,
 		      struct timespec *atime, struct timespec *mtime)
 {
-  int *p;
-  void *rpcbuf;
-  error_t err;
-
   if (!atime && !mtime)
     return 0; /* nothing to update */
 
   /* XXX For version 3 we can actually do this right, but we don't
      just yet. */
 
-  p = nfs_initialize_rpc (NFSPROC_SETATTR (protocol_version),
-			  cred, 0, &rpcbuf, np, -1);
-  if (! p)
-    return errno;
+  int *_utimes_sattr_encoder (int *p)
+  {
+    return xdr_encode_sattr_times (p, atime, mtime);
+  }
 
-  p = xdr_encode_fhandle (p, &np->nn->handle);
-  p = xdr_encode_sattr_times (p, atime, mtime);
-  if (protocol_version == 3)
-    *(p++) = 0;			/* guard check == 0 */
-
-  err = conduct_rpc (&rpcbuf, &p);
-  if (!err)
-    {
-      err = nfs_error_trans (ntohl (*p));
-      p++;
-      if (!err || protocol_version == 3)
-	p = process_wcc_stat (np, p, !err);
-    }
-
-  free (rpcbuf);
-  return err;
+  return nfs_setattr_rpc (cred, np, -1, _utimes_sattr_encoder);
 }
 
 /* Implement the netfs_attempt_set_size callback as described in
@@ -398,28 +374,14 @@ error_t
 netfs_attempt_set_size (struct iouser *cred, struct node *np,
 			off_t size)
 {
-  int *p;
-  void *rpcbuf;
   error_t err;
 
-  p = nfs_initialize_rpc (NFSPROC_SETATTR (protocol_version),
-			  cred, 0, &rpcbuf, np, -1);
-  if (! p)
-    return errno;
+  int *_size_sattr_encoder (int *p)
+  {
+    return xdr_encode_sattr_size (p, size);
+  }
 
-  p = xdr_encode_fhandle (p, &np->nn->handle);
-  p = xdr_encode_sattr_size (p, size);
-  if (protocol_version == 3)
-    *(p++) = 0;			/* guard_check == 0 */
-
-  err = conduct_rpc (&rpcbuf, &p);
-  if (!err)
-    {
-      err = nfs_error_trans (ntohl (*p));
-      p++;
-      if (!err || protocol_version == 3)
-	p = process_wcc_stat (np, p, !err);
-    }
+  err = nfs_setattr_rpc (cred, np, -1, _size_sattr_encoder);
 
   /* If we got EACCES, but the user has the file open for writing,
      then the NFS protocol has screwed us.  There's nothing we can do,
@@ -435,7 +397,6 @@ netfs_attempt_set_size (struct iouser *cred, struct node *np,
 	err = 0;
     }
 
-  free (rpcbuf);
   return err;
 }
 
