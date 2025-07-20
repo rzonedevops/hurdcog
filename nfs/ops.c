@@ -167,8 +167,10 @@ skip_returned_stat (int *p)
 }
 
 /* The reply to CREATE, MKDIR, SYMLINK and MKNOD in v3 all have
-   the same reply content. It is expected that 'np' is supplied
-   locked and any 'newnp' is also returned locked. */
+   the same reply content. 'np' should be supplied unlocked.
+   SYMLINK and MKNOD creation involve the translation of an
+   existing node '*newnp' that is supplied locked. On return
+   any '*newnp' is locked and 'np' is returned unlocked. */
 static error_t
 process_create_reply (struct iouser *cred,
 		      struct node *np,
@@ -188,25 +190,37 @@ process_create_reply (struct iouser *cred,
 
       if (handle_follows)
 	{
-	  p = xdr_decode_fhandle (p, newnp);
+	  p = (*newnp != NULL
+	       ? recache_handle (p, *newnp)
+	       : xdr_decode_fhandle (p, newnp));
 	  p = process_returned_stat (*newnp, p, 1);
 	}
       else
-	/* These will be refetched in LOOKUP */
+	/* These will be refetched by nfs_lookup_rpc () */
 	p = skip_returned_stat (p);
 
+      if (*newnp)
+	pthread_mutex_unlock (&(*newnp)->lock);
+
+      pthread_mutex_lock (&np->lock);
       p = process_wcc_stat (np, p, 1);
 
       if (!handle_follows)
       {
-	err = netfs_attempt_lookup (cred, np, name, newnp);
-	/* netfs_attempt_lookup always unlocks 'np' so... */
-	pthread_mutex_lock (&np->lock);
+	err = nfs_lookup_rpc (cred, np, name, newnp);
       }
+      else
+	pthread_mutex_unlock (&np->lock);
     }
   else
     {
+      if (*newnp)
+	pthread_mutex_unlock (&(*newnp)->lock);
+      pthread_mutex_lock (&np->lock);
       p = process_wcc_stat (np, p, 1);
+      pthread_mutex_unlock (&np->lock);
+      if (*newnp)
+	pthread_mutex_lock (&(*newnp)->lock);
     }
 
   return err;
@@ -869,6 +883,8 @@ netfs_attempt_mkdir (struct iouser *cred, struct node *np,
   p = xdr_encode_string (p, name);
   p = xdr_encode_create_state (p, mode, owner);
 
+  pthread_mutex_unlock (&np->lock);
+
   err = conduct_rpc (&rpcbuf, &p);
   if (!err)
     {
@@ -884,7 +900,10 @@ netfs_attempt_mkdir (struct iouser *cred, struct node *np,
 	    }
 	}
       else
-	err = process_create_reply (cred, np, name, &newnp, p);
+	{
+	  newnp = NULL;
+	  err = process_create_reply (cred, np, name, &newnp, p);
+	}
     }
 
   if (!err)
@@ -898,6 +917,8 @@ netfs_attempt_mkdir (struct iouser *cred, struct node *np,
       /* We don't actually return this. */
       netfs_nput (newnp);
     }
+
+  pthread_mutex_lock (&np->lock);
 
   free (rpcbuf);
   return err;
@@ -1253,16 +1274,17 @@ netfs_attempt_mkfile (struct iouser *cred, struct node *dir,
 
   name = malloc (50);
   if (! name)
-    return ENOMEM;
+    {
+      pthread_mutex_unlock (&dir->lock);
+      return ENOMEM;
+    }
 
   do
     {
       sprintf (name, ".nfstmpgnu.%d", n++);
       err = netfs_attempt_create_file (cred, dir, name, mode, newnp);
       if (err == EEXIST)
-	pthread_mutex_lock (&dir->lock);  /* XXX is this right? does create need this
-				     and drop this on error? Doesn't look
-				     like it. */
+	pthread_mutex_lock (&dir->lock);
     }
   while (err == EEXIST);
 
@@ -1342,6 +1364,8 @@ netfs_attempt_create_file (struct iouser *cred, struct node *np,
   err = conduct_rpc (&rpcbuf, &p);
   *newnp = 0;
 
+  pthread_mutex_unlock (&np->lock);
+
   if (!err)
     {
       if (protocol_version == 2)
@@ -1357,8 +1381,6 @@ netfs_attempt_create_file (struct iouser *cred, struct node *np,
       else
 	err = process_create_reply (cred, np, name, newnp, p);
 
-      pthread_mutex_unlock (&np->lock);
-
       if (*newnp && !netfs_validate_stat (*newnp, (struct iouser *) -1))
 	{
 	  if ((*newnp)->nn_stat.st_uid != owner)
@@ -1368,8 +1390,6 @@ netfs_attempt_create_file (struct iouser *cred, struct node *np,
 	    err = netfs_attempt_chmod (cred, *newnp, mode);
 	}
     }
-  else
-    pthread_mutex_unlock (&np->lock);
 
   free (rpcbuf);
   return err;
@@ -1500,7 +1520,6 @@ netfs_attempt_rename (struct iouser *cred, struct node *fromdir,
 
       pthread_mutex_lock (&fromdir->lock);
       err = netfs_attempt_lookup (cred, fromdir, fromname, &np);
-      pthread_mutex_unlock (&fromdir->lock);
       if (err)
 	return err;
 
