@@ -27,6 +27,19 @@
 #include <maptime.h>
 #include <sys/sysmacros.h>
 
+/* Rules for locking/unlocking of 'struct node'->lock
+   applicable throughout the whole module:
+   1) Only lock a single node at a time except when
+   2) A new node is created beneath a directory when the
+   directory node->lock is held but
+   3) Once the directory lock is released then 2) no
+   longer applies and rule 1) applies to the new node.
+*/
+
+static error_t
+nfs_lookup_rpc (struct iouser *cred, struct node *np,
+		const char *name, struct node **newnp);
+
 /* We have fresh stat information for NP; the file attribute (fattr)
    structure is at P.  Update our entry.  Return the address of the next
    int after the fattr structure.  */
@@ -736,12 +749,6 @@ error_t
 netfs_attempt_lookup (struct iouser *cred, struct node *np,
 		      const char *name, struct node **newnp)
 {
-  int *p;
-  void *rpcbuf;
-  error_t err;
-  char dirhandle[NFS3_FHSIZE];
-  size_t dirlen;
-
   /* Check the cache first. */
   *newnp = check_lookup_cache (np, name);
   if (*newnp)
@@ -754,6 +761,23 @@ netfs_attempt_lookup (struct iouser *cred, struct node *np,
       else
 	return 0;
     }
+
+  return nfs_lookup_rpc (cred, np, name, newnp);
+}
+
+/* LOOKUP rpc call to refetch the status of 'name' in directory
+   'np' which is supplied locked. Any '*newnp' supplied should be
+   unlocked and will be recached with the returned handle. On
+   return 'np' is unlocked and any '*newnp' is locked. */
+static error_t
+nfs_lookup_rpc (struct iouser *cred, struct node *np,
+		const char *name, struct node **newnp)
+{
+  int *p;
+  void *rpcbuf;
+  error_t err;
+  char dirhandle[NFS3_FHSIZE];
+  size_t dirlen;
 
   p = nfs_initialize_rpc (NFSPROC_LOOKUP (protocol_version),
 			  cred, 0, &rpcbuf, np, -1);
@@ -780,27 +804,33 @@ netfs_attempt_lookup (struct iouser *cred, struct node *np,
       p++;
       if (!err)
 	{
-	  p = xdr_decode_fhandle (p, newnp);
+	  if (*newnp != NULL)
+	    {
+	      pthread_mutex_lock (&(*newnp)->lock);
+	      p = recache_handle (p, *newnp);
+	    }
+	  else
+	    p = xdr_decode_fhandle (p, newnp);
+
 	  p = process_returned_stat (*newnp, p, 1);
 	}
-      if (err)
-	*newnp = 0;
       if (protocol_version == 3)
 	{
 	  if (*newnp)
 	    pthread_mutex_unlock (&(*newnp)->lock);
 	  pthread_mutex_lock (&np->lock);
-	  p = process_returned_stat (np, p, 0); /* XXX Do we have to lock np? */
+	  p = process_returned_stat (np, p, 0);
 	  pthread_mutex_unlock (&np->lock);
 	  if (*newnp)
 	    pthread_mutex_lock (&(*newnp)->lock);
 	}
     }
-  else
-    *newnp = 0;
 
-  /* Notify the cache of the hit or miss. */
-  enter_lookup_cache (dirhandle, dirlen, *newnp, name);
+  if (!err || err == ENOENT)
+    {
+      /* Notify the cache of the hit or miss. */
+      enter_lookup_cache (dirhandle, dirlen, *newnp, name);
+    }
 
   free (rpcbuf);
 
