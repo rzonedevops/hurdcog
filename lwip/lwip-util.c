@@ -333,6 +333,19 @@ configure_device (struct netif *netif, uint32_t addr, uint32_t netmask,
 {
   error_t err = 0;
 
+  /*
+   * The caller is trying to set an invalid address,
+   * set all fields to empty so it passes the validation
+   */
+  if (addr == INADDR_ANY || addr == INADDR_NONE)
+    {
+      addr = INADDR_NONE;
+      netmask = INADDR_NONE;
+      peer = INADDR_NONE;
+      broadcast = INADDR_NONE;
+      gateway = INADDR_NONE;
+    }
+
   if (netmask != INADDR_NONE)
     /*
      * If broadcasting is enabled and we have a netmask lesser than 31 bits
