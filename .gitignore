@@ -25,3 +25,13 @@ autom4te.cache/
 /doc/hurd.toc
 /doc/hurd.tp
 /doc/hurd.vr
+
+# External repositories - include structure but exclude git repos
+external/*/.*
+external/*/.git/
+external/*/build/
+external/*/dist/
+external/**/node_modules/
+external/**/*.o
+external/**/*.a
+external/**/*.so
