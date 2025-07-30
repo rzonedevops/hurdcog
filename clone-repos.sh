@@ -7,24 +7,37 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-echo "Cloning GNU Hurd ecosystem repositories..."
+# Function to log with timestamp
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
+
+# Function to handle errors
+error_exit() {
+    log "ERROR: $1"
+    exit 1
+}
+
+log "Starting GNU Hurd ecosystem repository cloning..."
 
 # Create directory structure
-mkdir -p external/gnu-repos external/hurd-repos
+mkdir -p external/gnu-repos external/hurd-repos || error_exit "Failed to create external directories"
 
 # Clone GNU repositories
-echo "Cloning GNU Bash..."
+log "Cloning GNU Bash..."
 if [ ! -d "external/gnu-repos/bash/.git" ]; then
     cd external/gnu-repos
-    git clone https://git.savannah.gnu.org/git/bash.git
+    if ! git clone --progress https://git.savannah.gnu.org/git/bash.git; then
+        error_exit "Failed to clone bash repository"
+    fi
     cd ../..
 else
-    echo "Bash already cloned, updating..."
+    log "Bash already cloned, updating..."
     cd external/gnu-repos/bash && git pull && cd ../../..
 fi
 
 # Clone Hurd repositories
-echo "Cloning Hurd ecosystem repositories..."
+log "Cloning Hurd ecosystem repositories..."
 
 repos=(
     "hurd.git:hurd-meta"
@@ -44,21 +57,24 @@ cd external/hurd-repos
 
 for repo in "${repos[@]}"; do
     IFS=':' read -r repo_path dir_name <<< "$repo"
-    echo "Cloning $repo_path to $dir_name..."
+    log "Cloning $repo_path to $dir_name..."
     
     if [ ! -d "$dir_name/.git" ]; then
-        git clone "https://git.savannah.gnu.org/git/$repo_path" "$dir_name"
+        if ! git clone --progress "https://git.savannah.gnu.org/git/$repo_path" "$dir_name"; then
+            error_exit "Failed to clone $repo_path"
+        fi
     else
-        echo "$dir_name already cloned, updating..."
+        log "$dir_name already cloned, updating..."
         cd "$dir_name" && git pull && cd ..
     fi
 done
 
 cd ../..
 
-echo "Repository cloning completed!"
-echo "Note: This script preserves the existing README.md files in each directory."
-echo "The actual repository content will be merged with the documentation structure."
+log "Repository cloning completed!"
+log "Note: This script preserves the existing README.md files in each directory."
+log "The actual repository content will be merged with the documentation structure."
 
 # Create a status file to indicate successful cloning
 echo "$(date): Repositories successfully cloned" > external/CLONE_STATUS.txt
+log "Status file created: external/CLONE_STATUS.txt"
