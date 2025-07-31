@@ -25,6 +25,9 @@ include ./Makeconf
 
 ## Subdirectories of this directory should all be mentioned here
 
+# Cognitive Kernel - Self-evolving scaffolding for GNU Hurd
+cognitive-subdirs = cogkernel
+
 # Hurd libraries
 lib-subdirs = libshouldbeinlibc libihash libiohelp libports \
 	      libpager libfshelp libdiskfs libtrivfs libps \
@@ -74,7 +77,7 @@ endif
 other-subdirs = hurd doc config release include
 
 # All the subdirectories together
-subdirs = $(lib-subdirs) $(prog-subdirs) $(other-subdirs)
+subdirs = $(cognitive-subdirs) $(lib-subdirs) $(prog-subdirs) $(other-subdirs)
 
 # This allows the creation of a file BROKEN in any of the prog-subdirs;
 # that will prevent this top level Makefile from attempting to make it.
