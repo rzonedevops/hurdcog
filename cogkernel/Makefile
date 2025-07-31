@@ -100,6 +100,16 @@ demo: working-demo.scm
 	@echo "=== Cognitive Kernel Demo ==="
 	@guile -s working-demo.scm
 
+# Meta-agentic integration demo
+meta-demo: issue-implementation.scm
+	@echo "=== Meta-Agentic Cognitive Kernel Integration Demo ==="
+	@guile -s issue-implementation.scm
+
+# Enhanced GUIX integration test
+guix-test: build/guix-integration.scm
+	@echo "=== Enhanced GUIX Build Integration Test ==="
+	@guile -s build/guix-integration.scm
+
 # Full integration test
 integration-test: full-integration-test.scm
 	@echo "=== Full Cognitive Kernel Integration Test ==="
@@ -111,4 +121,4 @@ repl: compile-modules
 	@echo "(use-modules (cogkernel core)) to get started"
 	@guile -c "(add-to-load-path \".\")"
 
-.PHONY: all check-guile compile-modules test install clean demo repl
+.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl
