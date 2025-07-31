@@ -25,3 +25,10 @@ autom4te.cache/
 /doc/hurd.toc
 /doc/hurd.tp
 /doc/hurd.vr
+
+# Exclude cloned repositories to avoid committing large external content
+/external/gnu-repos/
+/external/hurd-repos/
+/external/unicorn-forest-repos/
+/external/CLONE_STATUS.txt
+/external/UNICORN_FOREST_STATUS.txt
