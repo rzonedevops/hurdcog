@@ -1,4 +1,6 @@
 name: Clone Hurd Main
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
