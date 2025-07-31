@@ -96,11 +96,14 @@ clean:
 	@echo "Cleaned"
 
 # Demo of cognitive capabilities
-demo: compile-modules
+demo: working-demo.scm
 	@echo "=== Cognitive Kernel Demo ==="
-	@guile -c "(add-to-load-path \".\") \
-	          (use-modules (cogkernel core)) \
-	          (cognitive-demo!)"
+	@guile -s working-demo.scm
+
+# Full integration test
+integration-test: full-integration-test.scm
+	@echo "=== Full Cognitive Kernel Integration Test ==="
+	@guile -s full-integration-test.scm
 
 # Interactive Guile REPL with cognitive kernel loaded
 repl: compile-modules
