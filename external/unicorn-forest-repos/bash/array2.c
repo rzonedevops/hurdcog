@@ -311,7 +311,7 @@ if (j < n)
 
 	a->num_elements -= n;		/* modify bookkeeping information */
 	if (a->num_elements == 0)
-		a->first_index = a->max_index == -1;
+		a->first_index = a->max_index = -1;
 	else {
 		a->max_index -= n;
 		for (i = 0; i <= a->max_index; i++)
