@@ -25,3 +25,9 @@ autom4te.cache/
 /doc/hurd.toc
 /doc/hurd.tp
 /doc/hurd.vr
+
+# Exclude cloned repositories' .git directories to maintain monorepo structure  
+/external/gnu-repos/
+/external/hurd-repos/
+/external/**/.git/
+/external/CLONE_STATUS.txt
