@@ -655,7 +655,7 @@ array_insert(ARRAY *a, arrayind_t i, char *v)
 		a->num_elements++;
 	}
 
-	return (-1);		/* problem */
+	return (0);		/* success */
 }
 
 /*
