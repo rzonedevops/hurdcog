@@ -23,7 +23,15 @@ This repository consolidates the GNU Hurd ecosystem components and provides comp
 │       └── web/                  # Web documentation
 ├── docs/                         # Consolidated documentation
 │   ├── ARCHITECTURE.md           # System architecture overview
-│   └── DEVELOPMENT_PATHWAYS.md   # Development guidance
+│   ├── DEVELOPMENT_PATHWAYS.md   # Development guidance
+│   └── open-issues/              # Open documentation issues
+│       ├── README.md             # Documentation structure overview
+│       ├── advantages.md         # Technical advantages of Hurd
+│       ├── capabilities.md       # Capability-based security model
+│       ├── community.md          # Community resources and participation
+│       ├── contributing.md       # Contribution guidelines
+│       ├── faq.md               # Frequently asked questions
+│       └── open-issues.md        # Known issues and ongoing development
 ├── clone-repos.sh                # Repository cloning script
 └── [existing Hurd codebase]      # Current Hurd implementation
 ```
@@ -50,6 +58,7 @@ This script will clone all the external repositories into the appropriate direct
 
 - **[Architecture Overview](docs/ARCHITECTURE.md)**: Complete system architecture with mermaid diagrams
 - **[Development Pathways](docs/DEVELOPMENT_PATHWAYS.md)**: Structured development opportunities and guidance
+- **[Open Issues Documentation](docs/open-issues/README.md)**: Comprehensive documentation addressing GNU Hurd open issues
 - **[External Repository Overview](external/README.md)**: Organization of external components
 
 ## Architecture Highlights
