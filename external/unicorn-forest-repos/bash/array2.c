@@ -838,7 +838,8 @@ array_from_argv(ARRAY *a, char **vec, int count)
 
 	/* Fast case */
 	if (array_num_elements (a) == count && count == 1) {
-		t = vec[0] ? savestring (vec[0]) : 0;
+		i = 0;
+		t = vec[i] ? savestring (vec[i]) : 0;
 		ARRAY_VALUE_REPLACE(a, 0, t);
 	} else if (array_num_elements (a) <= count) {
 		/* modify in array_num_elements members in place, then add */
