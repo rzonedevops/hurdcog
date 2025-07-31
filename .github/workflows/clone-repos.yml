@@ -45,7 +45,7 @@ jobs:
         name: clone-output-log
         path: clone-output.log
 
-    - name: Generate Failure Log
+    - name: Upload Failure Log
       if: failure()
       run: |
         echo "Clone script failed at $(date)" > clone-failure.log
