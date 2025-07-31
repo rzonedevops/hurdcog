@@ -1,4 +1,4 @@
-# Unicorn-Forest Repositories Mapping
+# Unicorn-Forest Repositories Integration
 
 This document maps the issues #10-#19 to their corresponding Unicorn-Forest repositories, addressing issue #9.
 
@@ -30,32 +30,42 @@ The following repositories were also found in the Unicorn-Forest organization:
 | bash       | https://github.com/Unicorn-Forest/bash | `external/unicorn-forest-repos/bash` |
 | h          | https://github.com/Unicorn-Forest/h | `external/unicorn-forest-repos/h` |
 
-## Cloning Instructions
+## Monorepo Integration
 
-### Method 1: Clone All Repositories
+⚠️ **Important**: These repositories are integrated as a **monorepo structure** with:
+- ✅ **No .git headers** - All git metadata is removed during integration
+- ✅ **No submodules** - Content is copied directly into the main repository
+- ✅ **Direct integration** - All source code becomes part of the main repository
+
+## Integration Instructions
+
+### Method 1: Integrate All Repositories
 ```bash
 ./clone-repos.sh
 ```
-This will clone both GNU Hurd repositories and Unicorn-Forest repositories.
+This will integrate both GNU Hurd repositories and Unicorn-Forest repositories.
 
-### Method 2: Clone Only Unicorn-Forest Repositories
+### Method 2: Integrate Only Unicorn-Forest Repositories
 ```bash
 ./clone-unicorn-forest.sh
 ```
-This will clone only the Unicorn-Forest repositories.
+This will integrate only the Unicorn-Forest repositories as monorepo.
 
 ## Repository Status
 
-After cloning, check the status file:
+After integration, check the status file:
 ```bash
 cat external/UNICORN_FOREST_STATUS.txt
 ```
 
 ## Integration with Existing System
 
-The Unicorn-Forest repositories are cloned alongside the existing GNU Hurd repositories:
+The Unicorn-Forest repositories are integrated alongside the existing GNU Hurd repositories:
 
-- **GNU repositories**: `external/gnu-repos/` and `external/hurd-repos/`
-- **Unicorn-Forest repositories**: `external/unicorn-forest-repos/`
+- **GNU repositories**: `external/gnu-repos/` and `external/hurd-repos/` (as separate git repos)
+- **Unicorn-Forest repositories**: `external/unicorn-forest-repos/` (as monorepo - no .git directories)
 
-This allows for parallel development and comparison between the official GNU repositories and the Unicorn-Forest variants.
+This approach allows for:
+- **Parallel development** between official GNU repositories and Unicorn-Forest variants
+- **Direct source code access** without git submodule complexities
+- **Clean monorepo structure** for the Unicorn-Forest content

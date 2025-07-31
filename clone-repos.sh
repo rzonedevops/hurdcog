@@ -81,17 +81,17 @@ else
     log "Skipping Hurd repositories due to previous failure"
 fi
 
-# Clone Unicorn-Forest repositories (addressing issue #9)
-log "Cloning Unicorn-Forest repositories..."
+# Clone Unicorn-Forest repositories (addressing issue #9) - monorepo integration
+log "Integrating Unicorn-Forest repositories into monorepo..."
 if [ -x "./clone-unicorn-forest.sh" ]; then
     ./clone-unicorn-forest.sh
 else
     log "WARNING: clone-unicorn-forest.sh not found or not executable"
 fi
 
-log "Repository cloning completed!"
+log "Repository integration completed!"
 log "Note: This script preserves the existing README.md files in each directory."
-log "The actual repository content will be merged with the documentation structure."
+log "Unicorn-Forest repositories are integrated as monorepo without .git headers or submodules."
 
 # Create a status file to indicate successful cloning
 echo "$(date): Repositories successfully cloned" > external/CLONE_STATUS.txt

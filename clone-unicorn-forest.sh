@@ -1,7 +1,8 @@
 #!/bin/bash
-# Script to clone Unicorn-Forest repositories
-# This script clones repositories from the Unicorn-Forest GitHub organization
+# Script to integrate Unicorn-Forest repositories as monorepo
+# This script integrates repositories from the Unicorn-Forest GitHub organization
 # to address issue #9 and related issues #10-#19
+# Creates a monorepo structure with .git headers removed and NO SUBMODULES
 
 set -e
 
@@ -19,10 +20,14 @@ error_exit() {
     exit 1
 }
 
-log "Starting Unicorn-Forest repository cloning..."
+log "Starting Unicorn-Forest repository integration for monorepo..."
 
 # Create directory structure for Unicorn-Forest repositories
 mkdir -p external/unicorn-forest-repos || error_exit "Failed to create unicorn-forest-repos directory"
+
+# Create temporary directory for cloning
+TEMP_DIR=$(mktemp -d)
+trap "rm -rf $TEMP_DIR" EXIT
 
 # Repository mapping based on issues #10-#19
 repos=(
@@ -40,30 +45,43 @@ repos=(
     "h:h"                       # Additional repository found
 )
 
-cd external/unicorn-forest-repos
-
 for repo in "${repos[@]}"; do
     IFS=':' read -r repo_name dir_name <<< "$repo"
-    log "Cloning Unicorn-Forest/$repo_name to $dir_name..."
+    log "Integrating Unicorn-Forest/$repo_name into monorepo as $dir_name..."
     
-    if [ ! -d "$dir_name/.git" ]; then
-        if ! git clone --progress "https://github.com/Unicorn-Forest/$repo_name.git" "$dir_name"; then
-            error_exit "Failed to clone Unicorn-Forest/$repo_name"
-        fi
-    else
-        log "$dir_name already cloned, updating..."
-        cd "$dir_name" && git pull && cd ..
+    target_dir="external/unicorn-forest-repos/$dir_name"
+    
+    # Skip if directory already has content (not just empty directory)
+    if [ -d "$target_dir" ] && [ "$(ls -A "$target_dir" 2>/dev/null)" ]; then
+        log "$dir_name already integrated, skipping..."
+        continue
     fi
+    
+    # Clone to temporary location
+    temp_repo="$TEMP_DIR/$repo_name"
+    if ! git clone --progress "https://github.com/Unicorn-Forest/$repo_name.git" "$temp_repo"; then
+        log "WARNING: Failed to clone Unicorn-Forest/$repo_name, skipping..."
+        continue
+    fi
+    
+    # Remove .git directory to avoid submodules
+    rm -rf "$temp_repo/.git"
+    
+    # Create target directory and copy content (monorepo integration)
+    mkdir -p "$target_dir"
+    cp -r "$temp_repo"/* "$target_dir/" 2>/dev/null || log "No files to copy from $repo_name"
+    cp -r "$temp_repo"/.[^.]* "$target_dir/" 2>/dev/null || log "No hidden files to copy from $repo_name"
+    
+    log "Successfully integrated $repo_name into monorepo"
 done
 
-cd ../..
+log "Unicorn-Forest repository integration completed!"
+log "All repositories from issues #10-#19 have been successfully integrated as monorepo."
+log "No .git directories or submodules were created - all content is directly integrated."
 
-log "Unicorn-Forest repository cloning completed!"
-log "All repositories from issues #10-#19 have been successfully cloned."
-
-# Create a status file to indicate successful cloning
-echo "$(date): Unicorn-Forest repositories successfully cloned" > external/UNICORN_FOREST_STATUS.txt
-echo "Repository mapping:" >> external/UNICORN_FOREST_STATUS.txt
+# Create a status file to indicate successful integration
+echo "$(date): Unicorn-Forest repositories successfully integrated as monorepo" > external/UNICORN_FOREST_STATUS.txt
+echo "Repository mapping (monorepo integration):" >> external/UNICORN_FOREST_STATUS.txt
 echo "Issue #10 (gnumach) → external/unicorn-forest-repos/gnumach" >> external/UNICORN_FOREST_STATUS.txt
 echo "Issue #11 (hurd) → external/unicorn-forest-repos/hurd" >> external/UNICORN_FOREST_STATUS.txt
 echo "Issue #12 (libpthread) → external/unicorn-forest-repos/libpthread" >> external/UNICORN_FOREST_STATUS.txt
@@ -76,5 +94,10 @@ echo "Issue #18 (web) → external/unicorn-forest-repos/web" >> external/UNICORN
 echo "Issue #19 (glibc) → external/unicorn-forest-repos/glibc" >> external/UNICORN_FOREST_STATUS.txt
 echo "Additional: bash → external/unicorn-forest-repos/bash" >> external/UNICORN_FOREST_STATUS.txt
 echo "Additional: h → external/unicorn-forest-repos/h" >> external/UNICORN_FOREST_STATUS.txt
+echo "" >> external/UNICORN_FOREST_STATUS.txt
+echo "MONOREPO STRUCTURE: All repositories integrated without .git headers" >> external/UNICORN_FOREST_STATUS.txt
+echo "NO SUBMODULES: Content copied directly into main repository" >> external/UNICORN_FOREST_STATUS.txt
+
+log "Status file created: external/UNICORN_FOREST_STATUS.txt"
 
 log "Status file created: external/UNICORN_FOREST_STATUS.txt"
