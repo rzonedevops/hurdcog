@@ -10,6 +10,7 @@ on:
 jobs:
   clone-gnu-hurd:
     runs-on: ubuntu-latest
+    timeout-minutes: 60  # Add timeout to prevent hanging
 
     steps:
     - name: Checkout repository
@@ -21,9 +22,14 @@ jobs:
     - name: Run clone-repos.sh
       run: |
         chmod +x clone-repos.sh
-        ./clone-repos.sh
+        # Set git to be quiet and non-interactive
+        export GIT_TERMINAL_PROMPT=0
+        export GIT_QUIET=1
+        # Run with timeout and capture output
+        timeout 3000 ./clone-repos.sh 2>&1 | tee clone-output.log
       env:
         GIT_TERMINAL_PROMPT: 0
+        GIT_QUIET: 1
 
     - name: Upload CLONE_STATUS.txt
       if: success()
@@ -32,10 +38,20 @@ jobs:
         name: CLONE_STATUS
         path: external/CLONE_STATUS.txt
 
-#    - name: Upload Log Output
-#      if: failure()
-#      run: echo "Clone script failed" > clone-failure.log
-#      uses: actions/upload-artifact@v4
-#      with:
-#        name: clone-failure-log
-#        path: clone-failure.log
+    - name: Upload Log Output
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: clone-output-log
+        path: clone-output.log
+
+    - name: Upload Failure Log
+      if: failure()
+      run: |
+        echo "Clone script failed at $(date)" > clone-failure.log
+        echo "Last 50 lines of output:" >> clone-failure.log
+        tail -50 clone-output.log >> clone-failure.log 2>/dev/null || echo "No output log found" >> clone-failure.log
+      uses: actions/upload-artifact@v4
+      with:
+        name: clone-failure-log
+        path: clone-failure.log
