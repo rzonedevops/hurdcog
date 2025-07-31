@@ -25,3 +25,8 @@ autom4te.cache/
 /doc/hurd.toc
 /doc/hurd.tp
 /doc/hurd.vr
+
+# Hurd ecosystem integration
+!hurd-ecosystem/
+# Temporary integration files
+/tmp/hurd-integration-*
