@@ -677,7 +677,7 @@ array_remove(ARRAY *a, arrayind_t i)
 	if (ae) {
 		a->num_elements--;
 		if (a->num_elements == 0)
-			a->first_index = a->max_index == -1;
+			a->first_index = a->max_index = -1;
 		if (i == array_max_index(a)) {
 			for (ind = i; ind >= array_first_index(a); ind--)
 				if (a->elements[ind])
