@@ -13,6 +13,8 @@ GUILE_MODULES = atomspace/atomspace.scm \
                agents/agents.scm \
                attention/ecan.scm \
                tensors/tensors.scm \
+               cognitive-grip.scm \
+               machspace.scm \
                core.scm
 
 # Installation directory for Guile modules
@@ -45,6 +47,10 @@ compile-modules: check-guile $(GUILE_MODULES)
 	guile -c "(compile-file \"attention/ecan.scm\" #:output-file \"attention/ecan.go\")"
 	@export GUILE_LOAD_PATH=".:$$GUILE_LOAD_PATH"; \
 	guile -c "(compile-file \"tensors/tensors.scm\" #:output-file \"tensors/tensors.go\")"
+	@export GUILE_LOAD_PATH=".:$$GUILE_LOAD_PATH"; \
+	guile -c "(compile-file \"cognitive-grip.scm\" #:output-file \"cognitive-grip.go\")"
+	@export GUILE_LOAD_PATH=".:$$GUILE_LOAD_PATH"; \
+	guile -c "(compile-file \"machspace.scm\" #:output-file \"machspace.go\")"
 	@export GUILE_LOAD_PATH=".:$$GUILE_LOAD_PATH"; \
 	guile -c "(compile-file \"core.scm\" #:output-file \"core.go\")"
 	@echo "Cognitive Kernel modules compiled successfully"
@@ -121,4 +127,14 @@ repl: compile-modules
 	@echo "(use-modules (cogkernel core)) to get started"
 	@guile -c "(add-to-load-path \".\")"
 
-.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl
+# HurdCog minimal bootstrap test
+bootstrap-test: compile-modules
+	@echo "=== HurdCog Minimal Bootstrap Test ==="
+	@guile -s hurdcog-bootstrap.scm
+
+# Minimal bootstrap standalone test (no compilation needed)
+minimal-bootstrap: hurdcog-bootstrap.scm
+	@echo "=== HurdCog Minimal Bootstrap - Spin Cycle 1 ==="
+	@guile -s hurdcog-bootstrap.scm
+
+.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl bootstrap-test minimal-bootstrap
