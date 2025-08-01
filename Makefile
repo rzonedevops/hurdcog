@@ -337,3 +337,24 @@ stamp-version: version.h.in config.make
 	  < $< > version.h.new
 	$(move-if-change) version.h.new version.h
 	touch $@
+
+## HurdCog Cognitive Architecture Targets
+## Implementing "The Hand Principle" for GNU Hurd
+
+# HurdCog minimal bootstrap - Phase 1 implementation 
+hurdcog-bootstrap:
+	@echo "🧠 === HurdCog Minimal Bootstrap - Spin Cycle 1 === 🧠"
+	@echo "Implementing 'The Hand Principle' for GNU Hurd"
+	$(MAKE) -C cogkernel minimal-bootstrap
+
+# Cognitive kernel demo
+cognitive-demo:
+	@echo "🤖 === Cognitive Kernel Demo === 🤖"
+	$(MAKE) -C cogkernel demo
+
+# Complete cognitive system test
+cognitive-test: cognitive-demo hurdcog-bootstrap
+	@echo "✅ Cognitive architecture integration complete"
+	@echo "The computational hand now grips the GNU Hurd ecosystem!"
+
+.PHONY: hurdcog-bootstrap cognitive-demo cognitive-test

@@ -7,7 +7,11 @@
   #:use-module (ice-9 format)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
-  #:use-module (cogkernel meta-issue)
+  #:use-module (cogkernel atomspace)
+  #:use-module (cogkernel agents)
+  #:use-module (cogkernel attention)
+  #:use-module (cogkernel cognitive-grip)
+  #:use-module (cogkernel machspace)
   #:export (make-cognitive-kernel
             cognitive-kernel?
             cognitive-kernel-start!
@@ -18,7 +22,9 @@
             *cognitive-kernel*
             execute-meta-issue-demo
             initialize-cognitive-kernel!
-            cognitive-demo!))
+            cognitive-demo!
+            bootstrap-hurdcog-kernel!
+            hurdcog-minimal-bootstrap!))
 
 ;;; Cognitive kernel record
 (define-record-type <cognitive-kernel>
@@ -35,12 +41,12 @@
 
 ;;; Create cognitive kernel instance
 (define* (make-cognitive-kernel #:optional 
-         (atomspace (initialize-atomspace))
+         (atomspace (make-atomspace))
          (agent-system #f)
          (attention-bank #f))
   "Create a new cognitive kernel instance"
-  (let* ((agents (or agent-system (launch-agentic-tasks atomspace)))
-         (ecan (or attention-bank (initialize-ecan atomspace)))
+  (let* ((agents (or agent-system (make-agent-system)))
+         (ecan (or attention-bank (make-attention-bank)))
          (tensors (list
                    '(100 100 50 10)    ; Memory tensor shape  
                    '(10 8 10 4)        ; Task tensor shape
@@ -173,11 +179,65 @@
   (set! *cognitive-kernel* (make-cognitive-kernel))
   (format #t "AtomSpace initialized with tensor shape ~a~%" 
           (atomspace-tensor-shape (cognitive-kernel-atomspace *cognitive-kernel*)))
-  (format #t "Agent system initialized with ~a agents~%" 
-          (length (agent-system-agents (cognitive-kernel-agent-system *cognitive-kernel*))))
+  (format #t "Agent system initialized~%")
   (format #t "Attention bank initialized~%")
   (format #t "Tensor operations ready~%")
   (format #t "Cognitive Kernel ready for operation~%"))
+
+;;; HurdCog Minimal Bootstrap - Phase 1 Implementation
+(define (bootstrap-hurdcog-kernel!)
+  "Bootstrap the minimal HurdCog kernel as specified in Spin Cycle 1"
+  (format #t "=== HurdCog Minimal Bootstrap - Phase 1 ===~%")
+  
+  ;; Step 1: Initialize MachSpace (distributed AtomSpace)
+  (format #t "1. Implementing MachSpace (distributed AtomSpace)...~%")
+  (machspace-bootstrap! *global-machspace*)
+  
+  ;; Step 2: Create basic cognitive-grip mechanism
+  (format #t "2. Creating basic cognitive-grip mechanism...~%")
+  (bootstrap-cognitive-grip)
+  
+  ;; Step 3: Boot minimal HurdCog kernel
+  (format #t "3. Booting minimal HurdCog kernel...~%")
+  (unless *cognitive-kernel*
+    (initialize-cognitive-kernel!))
+  
+  ;; Step 4: Solve the 5 fundamental Hurd problems
+  (format #t "4. Applying cognitive grip to solve Hurd's 5 problems...~%")
+  (solve-hurd-problems)
+  
+  ;; Step 5: Test integration
+  (format #t "5. Testing HurdCog integration...~%")
+  (test-cognitive-grip)
+  
+  (format #t "✅ HurdCog Minimal Bootstrap Complete!~%")
+  (format #t "The computational hand now grips the GNU Hurd ecosystem~%"))
+
+;;; Complete minimal bootstrap demonstration
+(define (hurdcog-minimal-bootstrap!)
+  "Execute the complete minimal bootstrap for HurdCog as specified in the issue"
+  (format #t "🧠 === HURDCOG MINIMAL BOOTSTRAP DEMO === 🧠~%")
+  (format #t "Implementing 'The Hand Principle' for GNU Hurd~%~%")
+  
+  ;; Bootstrap the core systems
+  (bootstrap-hurdcog-kernel!)
+  
+  ;; Show the architectural transformation
+  (format #t "~%=== Architectural Transformation Complete ===~%")
+  (format #t "Before: Apps → OpenCog → GNU Hurd → Mach~%")
+  (format #t "After:  Interfaces → HurdCog → Distributed MachSpace~%~%")
+  
+  ;; Display system status
+  (format #t "=== HurdCog System Status ===~%")
+  (let ((machspace-stats (distributed-hypergraph-stats *global-machspace*))
+        (kernel-status (if *cognitive-kernel* 
+                          (cognitive-kernel-status *cognitive-kernel*)
+                          '())))
+    (format #t "MachSpace Statistics: ~a~%" machspace-stats)
+    (format #t "Cognitive Kernel Status: ~a~%" kernel-status))
+  
+  (format #t "~%🤝 'We're not so different, you and I,' said the Man to the AI.~%")
+  (format #t "And they shook hands through the same cognitive architecture.~%"))
 
 ;;; Demo function to show cognitive kernel in action
 (define (cognitive-demo!)
@@ -210,13 +270,13 @@
   "Execute the meta-issue demonstration with core integration"
   (format #t "=== INTEGRATED COGNITIVE KERNEL DEMO ===~%")
   
-  ;; Execute the meta-issue demo
-  (execute-meta-issue-demo)
+  ;; Execute the HurdCog bootstrap
+  (hurdcog-minimal-bootstrap!)
   
   ;; Execute the core demo  
   (cognitive-demo!)
   
-  (format #t "✅ Integration complete: Meta-issue + Core kernel operational~%"))
+  (format #t "✅ Integration complete: HurdCog + Core kernel operational~%"))
 
 ;;; Initialize the cognitive kernel (commented out for manual control)
 ;; (initialize-cognitive-kernel!)
