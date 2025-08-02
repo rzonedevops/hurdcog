@@ -25,6 +25,7 @@ This document provides quick access to the manual merge tools for resolving conf
 
 - [`MANUAL_MERGE_GUIDE.md`](MANUAL_MERGE_GUIDE.md) - Complete step-by-step documentation
 - [`resolve-clone-me-conflicts.sh`](resolve-clone-me-conflicts.sh) - Automated conflict resolution script
+- [`demo-merge-process.sh`](demo-merge-process.sh) - Demonstration script to validate the merge process
 
 ## Expected Conflicts
 
