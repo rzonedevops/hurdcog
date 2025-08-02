@@ -121,6 +121,7 @@ The external repositories are organized with placeholder documentation. Use the 
 - **Mailing Lists**: https://lists.gnu.org/mailman/listinfo/bug-hurd
 - **IRC**: #hurd on libera.chat
 - **Bug Tracking**: https://savannah.gnu.org/bugs/?group=hurd
+- **Manual Merge Guide**: [MANUAL_MERGE_GUIDE.md](MANUAL_MERGE_GUIDE.md) - For resolving branch conflicts via command line
 
 ## Next Steps
 
