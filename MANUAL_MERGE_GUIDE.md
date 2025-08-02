@@ -12,6 +12,29 @@ The `clone-me` branch contains significant automation and workflow enhancements 
 
 Due to the extensive changes, automatic merge conflicts occur in several files that require manual resolution.
 
+## 🤖 Automated Merge Resolution
+
+**NEW**: We now provide an automated workflow to resolve merge conflicts automatically!
+
+### Auto-Resolve Workflow
+- **Workflow**: `.github/workflows/auto-resolve-merge-conflicts.yml`
+- **Triggers**: Manual dispatch, weekly schedule (Mondays 10 AM UTC)
+- **Features**:
+  - Automatically attempts to merge and resolve conflicts
+  - Creates pull requests for successful merges
+  - Creates GitHub issues for failed merges with detailed logs
+  - Supports dry-run mode for testing
+
+### Triggering the Automated Workflow
+1. Go to the **Actions** tab in the GitHub repository
+2. Select **"Auto-Resolve Merge Conflicts"** workflow
+3. Click **"Run workflow"** and configure options:
+   - **Target branch**: Branch to merge into clone-me (default: master)
+   - **Create PR**: Whether to create a PR after successful merge
+   - **Dry run**: Test mode without making actual changes
+
+If the automated workflow fails, it will create a GitHub issue with detailed information and fallback to this manual guide.
+
 ## Prerequisites
 
 - Git installed and configured

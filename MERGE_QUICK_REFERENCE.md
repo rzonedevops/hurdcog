@@ -2,7 +2,18 @@
 
 This document provides quick access to the manual merge tools for resolving conflicts between the `clone-me` branch and `master`.
 
-## Quick Start
+## 🤖 Automated Option (Recommended)
+
+**Use the GitHub Actions workflow for automatic resolution:**
+
+1. Go to **Actions** → **"Auto-Resolve Merge Conflicts"**
+2. Click **"Run workflow"** with desired options
+3. If successful, a PR will be created automatically
+4. If failed, an issue will be created with detailed instructions
+
+## 📋 Manual Quick Start
+
+If automation fails or you prefer manual control:
 
 1. **Start the merge:**
    ```bash
