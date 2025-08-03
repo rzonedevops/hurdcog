@@ -357,4 +357,28 @@ cognitive-test: cognitive-demo hurdcog-bootstrap
 	@echo "✅ Cognitive architecture integration complete"
 	@echo "The computational hand now grips the GNU Hurd ecosystem!"
 
-.PHONY: hurdcog-bootstrap cognitive-demo cognitive-test
+# Phase 2 Core Services - Spin Cycle 2 implementation
+hurdcog-phase2:
+	@echo "🧠 === HurdCog Phase 2: Core Services - Spin Cycle 2 === 🧠"
+	@echo "Implementing TruthKernel, DarwinCore, and SchedSpace"
+	$(MAKE) -C cogkernel phase2-test
+
+# Individual Phase 2 component tests
+test-truthkernel:
+	@echo "🧠 === Testing TruthKernel === 🧠"
+	$(MAKE) -C cogkernel test-truthkernel
+
+test-darwincore:
+	@echo "🧬 === Testing DarwinCore === 🧬"
+	$(MAKE) -C cogkernel test-darwincore
+
+test-schedspace:
+	@echo "⚡ === Testing SchedSpace === ⚡"
+	$(MAKE) -C cogkernel test-schedspace
+
+# Complete Phase 2 integration test
+cognitive-phase2-test: hurdcog-phase2
+	@echo "✅ Phase 2 Core Services integration complete"
+	@echo "TruthKernel, DarwinCore, and SchedSpace operational!"
+
+.PHONY: hurdcog-bootstrap cognitive-demo cognitive-test hurdcog-phase2 test-truthkernel test-darwincore test-schedspace cognitive-phase2-test

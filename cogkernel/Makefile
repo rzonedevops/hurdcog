@@ -147,6 +147,24 @@ phase1-test: cognitive-primitives.scm scheme-adapters.scm test-patterns.scm hype
 	@echo "=== Phase 1 OpenCog-GNUHurd Integration Test ==="
 	@guile -s phase1-integration.scm
 
+# Phase 2 Core Services Tests
+phase2-test: phase2-standalone-test.scm
+	@echo "=== Phase 2 Core Services Integration Test ==="
+	@guile -s phase2-standalone-test.scm
+
+# Individual Phase 2 component tests
+test-truthkernel: truthkernel.scm
+	@echo "=== Testing TruthKernel ==="
+	@guile -c "(use-modules (cogkernel truthkernel)) (test-truth-kernel)"
+
+test-darwincore: darwincore.scm
+	@echo "=== Testing DarwinCore ==="
+	@guile -c "(use-modules (cogkernel darwincore)) (test-darwin-core)"
+
+test-schedspace: schedspace.scm
+	@echo "=== Testing SchedSpace ==="
+	@guile -c "(use-modules (cogkernel schedspace)) (test-sched-space)"
+
 # Run comprehensive Phase 1 integration
 phase1-integration: phase1-integration.scm
 	@echo "=== Complete Phase 1 Integration ==="
@@ -168,4 +186,4 @@ test-exhaustive: test-patterns.scm
 	@echo "=== Running Exhaustive Test Patterns ==="
 	@guile -c "(use-modules (cogkernel test-patterns)) (run-exhaustive-tests)"
 
-.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl bootstrap-test minimal-bootstrap phase1-test phase1-integration test-cognitive-primitives test-scheme-adapters test-exhaustive generate-diagrams
+.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl bootstrap-test minimal-bootstrap phase1-test phase1-integration test-cognitive-primitives test-scheme-adapters test-exhaustive generate-diagrams phase2-test test-truthkernel test-darwincore test-schedspace
