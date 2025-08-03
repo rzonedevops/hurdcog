@@ -15,7 +15,12 @@ GUILE_MODULES = atomspace/atomspace.scm \
                tensors/tensors.scm \
                cognitive-grip.scm \
                machspace.scm \
-               core.scm
+               core.scm \
+               cognitive-primitives.scm \
+               scheme-adapters.scm \
+               test-patterns.scm \
+               hypergraph-viz.scm \
+               phase1-integration.scm
 
 # Installation directory for Guile modules
 GUILE_SITE_DIR = $(datadir)/guile/site/$(GUILE_EFFECTIVE_VERSION)/cogkernel
@@ -137,4 +142,30 @@ minimal-bootstrap: hurdcog-bootstrap.scm
 	@echo "=== HurdCog Minimal Bootstrap - Spin Cycle 1 ==="
 	@guile -s hurdcog-bootstrap.scm
 
-.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl bootstrap-test minimal-bootstrap
+# Phase 1 OpenCog-GNUHurd Integration Test
+phase1-test: cognitive-primitives.scm scheme-adapters.scm test-patterns.scm hypergraph-viz.scm phase1-integration.scm
+	@echo "=== Phase 1 OpenCog-GNUHurd Integration Test ==="
+	@guile -s phase1-integration.scm
+
+# Run comprehensive Phase 1 integration
+phase1-integration: phase1-integration.scm
+	@echo "=== Complete Phase 1 Integration ==="
+	@guile -c "(use-modules (cogkernel phase1-integration)) (complete-phase1-integration)"
+
+# Test cognitive primitives
+test-cognitive-primitives: cognitive-primitives.scm
+	@echo "=== Testing Cognitive Primitives ==="
+	@guile -c "(use-modules (cogkernel cognitive-primitives)) \
+	          (test-round-trip-translation 'VM_ALLOCATE '(MEMORY 2 KERNEL 8 3))"
+
+# Test scheme adapters
+test-scheme-adapters: scheme-adapters.scm
+	@echo "=== Testing Scheme Adapters ==="  
+	@guile -c "(use-modules (cogkernel scheme-adapters)) (test-adapter-round-trip)"
+
+# Run exhaustive test patterns
+test-exhaustive: test-patterns.scm
+	@echo "=== Running Exhaustive Test Patterns ==="
+	@guile -c "(use-modules (cogkernel test-patterns)) (run-exhaustive-tests)"
+
+.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl bootstrap-test minimal-bootstrap phase1-test phase1-integration test-cognitive-primitives test-scheme-adapters test-exhaustive generate-diagrams
