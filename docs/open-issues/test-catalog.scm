@@ -38,7 +38,7 @@
       (subcategory . "Performance and Scalability")
       (status . "Active development area")
       (resolution-criteria . '("Solution implemented: GNU Mach SMP improvements" "Feature implemented and functional" "Solution implemented: Scalable locking mechanisms"))
-      (dependencies . '("server" "SMP" "GNU Mach"))
+      (dependencies . '("server" "GNU Mach" "SMP"))
       (solutions . '("GNU Mach SMP improvements" "Thread-safe server implementations" "Scalable locking mechanisms")))
      ((title . "Server Recovery")
       (description . "Issue: Some server crashes can still affect system stability")

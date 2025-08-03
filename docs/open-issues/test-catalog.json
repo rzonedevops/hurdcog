@@ -262,8 +262,8 @@
         ],
         "dependencies": [
           "server",
-          "SMP",
-          "GNU Mach"
+          "GNU Mach",
+          "SMP"
         ],
         "category": "major_open_issues",
         "subcategory": "Performance and Scalability",
