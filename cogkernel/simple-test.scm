@@ -2,13 +2,13 @@
 
 ;; Test AtomSpace
 (format #t "=== Testing AtomSpace ===~%")
-(load "atomspace/atomspace.scm")
+(use-modules (cogkernel atomspace))
 (let ((atom (make-atom 'CONCEPT "test-concept")))
   (format #t "✓ Created atom: ~a (type: ~a)~%" (atom-name atom) (atom-type atom)))
 
 ;; Test Tensors
 (format #t "=== Testing Tensors ===~%")
-(load "tensors/tensors.scm")  
+(use-modules (cogkernel tensors))  
 (let ((tensor (tensor-zeros '(2 2))))
   (format #t "✓ Created tensor with shape: ~a~%" (tensor-shape tensor)))
 
