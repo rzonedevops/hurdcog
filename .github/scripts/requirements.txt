@@ -1,8 +1,8 @@
 # Security-conscious requirements with version pinning
 
-requests==2.32.3 --hash=sha256:5e2f9b3c7f7e3ea2e941a4f8c6e1f2b1ae5a54e1cf3a46d9e08d9b21c7c3e9d7
+requests==2.32.4 --hash=sha256:27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c --hash=sha256:27d0316682c8a29834d3264820024b62a36942083d52caf2f14c0591336d3422
 pyyaml==6.0.1 --hash=sha256:7b2c6d67c8d5f8904b5e2b2c8c9c2a2b8d1e2e6c2e6b2b7e0a1e2d8c5bdf1e3c
-urllib3==2.2.1 --hash=sha256:2ebc0d3c1e09e3a1e24c0e2f8e4a1d5f0b8e3c7d2a1c0d3b2a1e4b2c1e4c0f5d
+urllib3==2.5.0 --hash=sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760 --hash=sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc
 
 # Security-conscious requirements with version pinning
 # requests>=2.31.0,<3.0.0
