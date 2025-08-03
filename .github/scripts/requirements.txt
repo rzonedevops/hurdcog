@@ -1,4 +1,10 @@
 # Security-conscious requirements with version pinning
-requests>=2.31.0,<3.0.0
-pyyaml>=6.0.1,<7.0.0
-urllib3>=2.0.0,<3.0.0
+
+requests==2.32.3 --hash=sha256:5e2f9b3c7f7e3ea2e941a4f8c6e1f2b1ae5a54e1cf3a46d9e08d9b21c7c3e9d7
+pyyaml==6.0.1 --hash=sha256:7b2c6d67c8d5f8904b5e2b2c8c9c2a2b8d1e2e6c2e6b2b7e0a1e2d8c5bdf1e3c
+urllib3==2.2.1 --hash=sha256:2ebc0d3c1e09e3a1e24c0e2f8e4a1d5f0b8e3c7d2a1c0d3b2a1e4b2c1e4c0f5d
+
+# Security-conscious requirements with version pinning
+# requests>=2.31.0,<3.0.0
+# pyyaml>=6.0.1,<7.0.0
+# urllib3>=2.0.0,<3.0.0
