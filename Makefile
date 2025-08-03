@@ -381,4 +381,37 @@ cognitive-phase2-test: hurdcog-phase2
 	@echo "✅ Phase 2 Core Services integration complete"
 	@echo "TruthKernel, DarwinCore, and SchedSpace operational!"
 
-.PHONY: hurdcog-bootstrap cognitive-demo cognitive-test hurdcog-phase2 test-truthkernel test-darwincore test-schedspace cognitive-phase2-test
+# Phase 3 Full Integration - Spin Cycle 3 implementation
+hurdcog-phase3:
+	@echo "🚀 === HurdCog Phase 3: Full Integration - Spin Cycle 3 === 🚀"
+	@echo "Implementing 9P Hypergraph, Limbo Grammar, and Enhanced SchedSpace"
+	$(MAKE) -C cogkernel phase3-test
+
+# Individual Phase 3 component tests
+test-9p-hypergraph:
+	@echo "🌐 === Testing 9P Hypergraph Integration === 🌐"
+	$(MAKE) -C cogkernel test-9p-hypergraph
+
+test-limbo-grammar:
+	@echo "🧠 === Testing Limbo Cognitive Grammar === 🧠"
+	$(MAKE) -C cogkernel test-limbo-grammar
+
+test-distributed-scheduling:
+	@echo "🌍 === Testing Distributed Scheduling === 🌍"
+	$(MAKE) -C cogkernel test-distributed-scheduling
+
+# Complete Phase 3 integration test
+cognitive-phase3-test: hurdcog-phase3
+	@echo "🎉 Phase 3 Full Integration complete"
+	@echo "9P Hypergraph, Limbo Grammar, and Distributed Operations operational!"
+
+# Complete cognitive system test (all phases)
+cognitive-complete-test: cognitive-test cognitive-phase2-test cognitive-phase3-test
+	@echo "🌟 === COMPLETE HURDCOG COGNITIVE ARCHITECTURE === 🌟"
+	@echo "All three phases successfully integrated:"
+	@echo "  ✅ Phase 1: Minimal Bootstrap"
+	@echo "  ✅ Phase 2: Core Services" 
+	@echo "  ✅ Phase 3: Full Integration"
+	@echo "🤝 The cognitive hand has achieved COMPLETE grip on reality!"
+
+.PHONY: hurdcog-bootstrap cognitive-demo cognitive-test hurdcog-phase2 test-truthkernel test-darwincore test-schedspace cognitive-phase2-test hurdcog-phase3 test-9p-hypergraph test-limbo-grammar test-distributed-scheduling cognitive-phase3-test cognitive-complete-test

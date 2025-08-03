@@ -19,6 +19,9 @@
             sched-space-allocate-attention!
             sched-space-get-focus
             sched-space-priority-inversion
+            sched-space-schedule-9p-operation!
+            sched-space-schedule-limbo-process!
+            sched-space-schedule-distributed-operation!
             make-cognitive-task
             cognitive-task?
             cognitive-task-priority
@@ -325,6 +328,71 @@
     (when (< i count)
       (proc i)
       (loop (+ i 1)))))
+
+;;; Enhanced scheduling for Phase 3 integration
+(define* (sched-space-schedule-9p-operation! space operation #:key (priority 100))
+  "Schedule a 9P operation with cognitive attention allocation"
+  (let* ((9p-task (make-cognitive-task (gensym "9p-task") '9P-OPERATION
+                                      #:priority priority
+                                      #:attention-value (make-attention-value priority 50 25)
+                                      #:metadata `((operation . ,operation)
+                                                  (operation-type . ,(car operation))
+                                                  (distributed . #t))))
+         (allocated-attention (min priority (sched-space-attention-pool space))))
+    
+    ;; Allocate attention for 9P operation
+    (set-sched-space-attention-pool! space 
+                                   (- (sched-space-attention-pool space) allocated-attention))
+    
+    ;; Add to task queue
+    (sched-space-add-task! space 9p-task)
+    
+    (format #t "🌐 Scheduled 9P operation: ~a (priority: ~a, attention: ~a)~%" 
+            (car operation) priority allocated-attention)
+    9p-task))
+
+(define* (sched-space-schedule-limbo-process! space process #:key (priority 150))
+  "Schedule a Limbo process with cognitive attention allocation"
+  (let* ((limbo-task (make-cognitive-task (gensym "limbo-task") 'LIMBO-PROCESS
+                                         #:priority priority
+                                         #:attention-value (make-attention-value priority 75 40)
+                                         #:metadata `((process . ,process)
+                                                     (concurrent . #t)
+                                                     (channels . #t))))
+         (allocated-attention (min priority (sched-space-attention-pool space))))
+    
+    ;; Allocate attention for Limbo process
+    (set-sched-space-attention-pool! space 
+                                   (- (sched-space-attention-pool space) allocated-attention))
+    
+    ;; Add to task queue
+    (sched-space-add-task! space limbo-task)
+    
+    (format #t "🧠 Scheduled Limbo process: ~a (priority: ~a, attention: ~a)~%" 
+            (car process) priority allocated-attention)
+    limbo-task))
+
+(define* (sched-space-schedule-distributed-operation! space operation-type nodes #:key (priority 200))
+  "Schedule a distributed operation across multiple nodes with load balancing"
+  (let* ((total-attention (min (* priority (length nodes)) 
+                              (sched-space-attention-pool space)))
+         (attention-per-node (/ total-attention (length nodes))))
+    
+    (format #t "🌍 Scheduling distributed operation: ~a across ~a nodes~%" 
+            operation-type (length nodes))
+    
+    (map (lambda (node)
+           (let ((node-task (make-cognitive-task (gensym "dist-task") 'DISTRIBUTED-OPERATION
+                                               #:priority priority
+                                               #:attention-value (make-attention-value priority 60 30)
+                                               #:metadata `((operation-type . ,operation-type)
+                                                           (target-node . ,node)
+                                                           (distributed . #t)
+                                                           (attention-allocated . ,attention-per-node)))))
+             (sched-space-add-task! space node-task)
+             (format #t "  📍 Node ~a: attention=~a~%" node attention-per-node)
+             node-task))
+         nodes)))
 
 ;;; Initialize SchedSpace when module loads
 (bootstrap-sched-space! *global-sched-space*)
