@@ -186,4 +186,25 @@ test-exhaustive: test-patterns.scm
 	@echo "=== Running Exhaustive Test Patterns ==="
 	@guile -c "(use-modules (cogkernel test-patterns)) (run-exhaustive-tests)"
 
-.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl bootstrap-test minimal-bootstrap phase1-test phase1-integration test-cognitive-primitives test-scheme-adapters test-exhaustive generate-diagrams phase2-test test-truthkernel test-darwincore test-schedspace
+# Phase 3 Full Integration Tests
+phase3-test: phase3-standalone-test.scm
+	@echo "=== Phase 3 Full Integration Test ==="
+	@guile -s phase3-standalone-test.scm
+
+# Individual Phase 3 component tests
+test-9p-hypergraph: 9p-hypergraph.scm
+	@echo "=== Testing 9P Hypergraph Integration ==="
+	@guile -c "(use-modules (cogkernel 9p-hypergraph)) (demo-9p-hypergraph!)"
+
+test-limbo-grammar: limbo-grammar.scm
+	@echo "=== Testing Limbo Cognitive Grammar ==="
+	@guile -c "(use-modules (cogkernel limbo-grammar)) (demo-limbo-grammar!)"
+
+test-distributed-scheduling: schedspace.scm
+	@echo "=== Testing Enhanced Distributed Scheduling ==="
+	@guile -c "(use-modules (cogkernel schedspace)) \
+	          (bootstrap-sched-space!) \
+	          (sched-space-schedule-distributed-operation! *global-sched-space* \
+	            'TEST-DISTRIBUTED-OP '(node1 node2 node3) #:priority 200)"
+
+.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl bootstrap-test minimal-bootstrap phase1-test phase1-integration test-cognitive-primitives test-scheme-adapters test-exhaustive generate-diagrams phase2-test test-truthkernel test-darwincore test-schedspace phase3-test test-9p-hypergraph test-limbo-grammar test-distributed-scheduling
