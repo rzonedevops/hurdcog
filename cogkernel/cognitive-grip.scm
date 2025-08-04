@@ -35,6 +35,15 @@
   (object grip-object)    ; The object being gripped
   (strength grip-strength)) ; Overall grip strength
 
+;;; Helper function to get object address
+(define (object-address obj)
+  "Get a unique address/hash for any object"
+  (cond
+   ((atom? obj) (string-hash (atom-name obj)))
+   ((string? obj) (string-hash obj))
+   ((list? obj) (string-hash (format #f "~a" obj)))
+   (else (string-hash (format #f "~a" obj)))))
+
 ;;; The core cognitive-grip function as specified in the issue
 (define (cognitive-grip object)
   "Create a cognitive grip on any computational object using the 5 fingers principle"

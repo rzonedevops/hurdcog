@@ -14,11 +14,13 @@
             atom-type
             atom-name
             atom-value
+            atom-confidence
             link-type
             link-outgoing
             atomspace-add!
             atomspace-get
             atomspace-query
+            atomspace-get-atoms
             atomspace-tensor-shape
             make-atomspace
             atomspace?
@@ -125,6 +127,11 @@
   "Query atomspace for atoms matching the given predicate"
   (filter predicate 
           (hash-map->list (lambda (k v) v) (atomspace-atoms atomspace))))
+
+;;; Get all atoms from atomspace
+(define (atomspace-get-atoms atomspace)
+  "Get all atoms from the atomspace"
+  (hash-map->list (lambda (k v) v) (atomspace-atoms atomspace)))
 
 ;;; Get tensor shape information
 (define (atomspace-tensor-shape atomspace)
