@@ -8,6 +8,11 @@ DISTFILES := README.md
 
 include ../Makeconf
 
+# C library for HurdCog microkernel bridge
+BRIDGE_LIB = libhurd-atomspace-bridge.so
+BRIDGE_SOURCES = hurd-atomspace-bridge.c
+BRIDGE_HEADERS = hurd-atomspace-bridge.h
+
 # Guile modules for the cognitive kernel
 GUILE_MODULES = atomspace/atomspace.scm \
                agents/agents.scm \
@@ -15,6 +20,7 @@ GUILE_MODULES = atomspace/atomspace.scm \
                tensors/tensors.scm \
                cognitive-grip.scm \
                machspace.scm \
+               microkernel-integration.scm \
                core.scm \
                cognitive-primitives.scm \
                scheme-adapters.scm \
@@ -207,4 +213,46 @@ test-distributed-scheduling: schedspace.scm
 	          (sched-space-schedule-distributed-operation! *global-sched-space* \
 	            'TEST-DISTRIBUTED-OP '(node1 node2 node3) #:priority 200)"
 
-.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl bootstrap-test minimal-bootstrap phase1-test phase1-integration test-cognitive-primitives test-scheme-adapters test-exhaustive generate-diagrams phase2-test test-truthkernel test-darwincore test-schedspace phase3-test test-9p-hypergraph test-limbo-grammar test-distributed-scheduling
+# Build C bridge library for microkernel integration
+$(BRIDGE_LIB): $(BRIDGE_SOURCES) $(BRIDGE_HEADERS)
+	@echo "=== Building HurdCog Microkernel Bridge Library ==="
+	@if [ -f /usr/include/mach/mach.h ]; then \
+		echo "Building with real Hurd headers"; \
+		gcc -shared -fPIC -o $(BRIDGE_LIB) $(BRIDGE_SOURCES) \
+			-I../include -I../hurd \
+			-lmach -lhurd -lpthread; \
+	else \
+		echo "Building stub version for non-Hurd systems"; \
+		gcc -shared -fPIC -o $(BRIDGE_LIB) hurd-atomspace-bridge-stub.c \
+			-I. -lpthread; \
+	fi
+	@echo "✅ Bridge library built successfully"
+
+# Test microkernel integration
+test-microkernel-integration: $(BRIDGE_LIB) microkernel-integration.scm
+	@echo "=== Testing Microkernel Integration - Phase 2 ==="
+	@export LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH && \
+	 guile -c "(add-to-load-path \".\") \
+	          (use-modules (cogkernel microkernel-integration)) \
+	          (bootstrap-microkernel-integration) \
+	          (microkernel-health-check) \
+	          (monitor-microkernel-performance)"
+
+# Phase 2 microkernel integration demo
+phase2-microkernel-demo: $(BRIDGE_LIB)
+	@echo "🧠 === Phase 2: Microkernel Integration Demo === 🧠"
+	@export LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH && \
+	 guile -s standalone-microkernel-test.scm
+
+# Build all targets including C library
+all: check-guile $(BRIDGE_LIB) compile-modules
+
+# Clean including C library
+clean:
+	@echo "Cleaning cognitive kernel..."
+	@rm -rf compiled
+	@rm -f $(BRIDGE_LIB)
+	@find . -name "*.go" -delete
+	@find . -name "*~" -delete
+
+.PHONY: all check-guile compile-modules test install clean demo meta-demo guix-test repl bootstrap-test minimal-bootstrap phase1-test phase1-integration test-cognitive-primitives test-scheme-adapters test-exhaustive generate-diagrams phase2-test test-truthkernel test-darwincore test-schedspace phase3-test test-9p-hypergraph test-limbo-grammar test-distributed-scheduling test-microkernel-integration phase2-microkernel-demo
