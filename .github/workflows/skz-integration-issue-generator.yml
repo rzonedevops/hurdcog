@@ -72,19 +72,19 @@ jobs:
                   const isCompleted = taskMatch[1] === 'x';
                   const taskTitle = taskMatch[2];
                   
-                  if (!isCompleted) { // Only create issues for incomplete tasks
-                    currentTasks.push({
-                      title: taskTitle,
-                      completed: false,
-                      tensorDoF: Math.floor(Math.random() * 10) + 1, // Random DoF for demo
-                      acceptanceCriteria: [
-                        `Complete implementation of: ${taskTitle}`,
-                        'Verify functionality through testing',
-                        'Update documentation as needed',
-                        'Ensure integration with existing SKZ framework'
-                      ]
-                    });
-                  }
+                  // Create issues for ALL tasks (both completed and incomplete)
+                  // This allows tracking of completed work and future work
+                  currentTasks.push({
+                    title: taskTitle,
+                    completed: isCompleted,
+                    tensorDoF: Math.floor(Math.random() * 10) + 1, // Random DoF for demo
+                    acceptanceCriteria: [
+                      `Complete implementation of: ${taskTitle}`,
+                      'Verify functionality through testing',
+                      'Update documentation as needed',
+                      'Ensure integration with existing SKZ framework'
+                    ]
+                  });
                 }
               }
             }
@@ -105,11 +105,14 @@ jobs:
             // Create issues for each phase and its tasks
             for (const phase of phases) {
               if (phase.tasks.length === 0) {
-                console.log(`Skipping ${phase.title} - no incomplete tasks`);
+                console.log(`Skipping ${phase.title} - no tasks found`);
                 continue;
               }
               
-              console.log(`Processing ${phase.title} with ${phase.tasks.length} tasks`);
+              const completedTasks = phase.tasks.filter(task => task.completed).length;
+              const incompleteTasks = phase.tasks.filter(task => !task.completed).length;
+              
+              console.log(`Processing ${phase.title} with ${phase.tasks.length} total tasks (${completedTasks} completed, ${incompleteTasks} incomplete)`);
               
               // Create parent epic issue for the phase
               const epicBody = `# ${phase.title}
@@ -118,10 +121,14 @@ jobs:
             This epic tracks the completion of ${phase.title} in the SKZ Integration project.
             
             ## Sub-Tasks
-            This epic contains ${phase.tasks.length} sub-tasks that need to be completed.
+            This epic contains ${phase.tasks.length} sub-tasks (${completedTasks} completed, ${incompleteTasks} remaining).
             
             ## Phase Attention Weight
             \`phase_attention: ${Math.random().toFixed(2)}\`
+            
+            ## Progress Status
+            - Completed Tasks: ${completedTasks}/${phase.tasks.length} (${Math.round((completedTasks/phase.tasks.length)*100)}%)
+            - Remaining Tasks: ${incompleteTasks}/${phase.tasks.length}
             
             ## Acceptance Criteria
             - [ ] All sub-tasks in this phase are completed
@@ -152,11 +159,21 @@ jobs:
               
               // Create sub-issues for each task
               for (const task of phase.tasks) {
+                const statusText = task.completed ? 'COMPLETED' : 'PENDING';
+                const statusEmoji = task.completed ? '✅' : '⏳';
+                
                 const taskBody = `# ${task.title}
             
             ## Description
             This task is part of ${phase.title} in the SKZ Integration workflow.
             
+            ## Status
+            ${statusEmoji} **${statusText}**
+            
+            ${task.completed ? `
+            ## Completion Notes
+            This task has been completed as part of the SKZ Integration project.
+            ` : `
             ## Actionable Steps
             1. Analyze requirements for: ${task.title}
             2. Design implementation approach
@@ -164,9 +181,10 @@ jobs:
             4. Test the implementation
             5. Update documentation
             6. Verify integration with SKZ framework
+            `}
             
             ## Acceptance Criteria
-            ${task.acceptanceCriteria.map(criteria => `- [ ] ${criteria}`).join('\n')}
+            ${task.acceptanceCriteria.map(criteria => `- [${task.completed ? 'x' : ' '}] ${criteria}`).join('\n')}
             
             ## Tensor Degrees of Freedom (DoF)
             \`tensor_dof: ${task.tensorDoF}\`
@@ -182,15 +200,22 @@ jobs:
             `;
                 
                 if (!dryRun) {
+                  const labels = ['task', 'skz-integration', phase.id, `tensor-dof-${task.tensorDoF}`];
+                  if (task.completed) {
+                    labels.push('completed');
+                  } else {
+                    labels.push('pending');
+                  }
+                  
                   const taskIssue = await github.rest.issues.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    title: task.title,
+                    title: `${task.completed ? '✅ ' : '⏳ '}${task.title}`,
                     body: taskBody,
-                    labels: ['task', 'skz-integration', phase.id, `tensor-dof-${task.tensorDoF}`]
+                    labels: labels
                   });
                   
-                  console.log(`Created task issue #${taskIssue.data.number}: ${taskIssue.data.title}`);
+                  console.log(`Created task issue #${taskIssue.data.number}: ${taskIssue.data.title} (${statusText})`);
                   createdIssues.push(taskIssue.data);
                   
                   // Add comment to epic linking the sub-issue
@@ -198,13 +223,20 @@ jobs:
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     issue_number: epicIssue.data.number,
-                    body: `Sub-task created: #${taskIssue.data.number} - ${taskIssue.data.title}`
+                    body: `Sub-task created: #${taskIssue.data.number} - ${taskIssue.data.title} (${statusText})`
                   });
                 } else {
-                  console.log(`[DRY RUN] Would create task: ${task.title}`);
+                  console.log(`[DRY RUN] Would create task: ${task.title} (${statusText})`);
                 }
               }
             }
+            
+            // Calculate statistics
+            const totalTasks = phases.reduce((sum, phase) => sum + phase.tasks.length, 0);
+            const completedTasks = phases.reduce((sum, phase) => sum + phase.tasks.filter(task => task.completed).length, 0);
+            const incompleteTasks = totalTasks - completedTasks;
+            const epicIssues = phases.filter(p => p.tasks.length > 0).length;
+            const taskIssues = createdIssues.length - epicIssues;
             
             // Create summary issue
             const summaryBody = `# SKZ Integration Task Generator - Execution Summary
@@ -215,8 +247,12 @@ jobs:
             ## Statistics
             - Total Phases Processed: ${phases.length}
             - Total Issues Created: ${createdIssues.length}
-            - Epic Issues: ${phases.filter(p => p.tasks.length > 0).length}
-            - Task Issues: ${createdIssues.length - phases.filter(p => p.tasks.length > 0).length}
+            - Epic Issues: ${epicIssues}
+            - Task Issues: ${taskIssues}
+            - Total Tasks Tracked: ${totalTasks}
+            - Completed Tasks: ${completedTasks}
+            - Incomplete Tasks: ${incompleteTasks}
+            - Overall Progress: ${Math.round((completedTasks/totalTasks)*100)}%
             
             ## Created Issues
             ${createdIssues.map(issue => `- #${issue.number}: ${issue.title}`).join('\n')}
@@ -249,4 +285,4 @@ jobs:
               console.log(summaryBody);
             }
             
-            console.log(`Task generation completed. ${dryRun ? 'Dry run mode - no issues created.' : `Created ${createdIssues.length} issues.`}`);
+            console.log(`Task generation completed. ${dryRun ? 'Dry run mode - no issues created.' : `Created ${createdIssues.length} issues (${completedTasks} completed tasks, ${incompleteTasks} incomplete tasks tracked).`}`);
