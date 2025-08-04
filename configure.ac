@@ -359,6 +359,28 @@ AC_SUBST([HAVE_LIBPCIACCESS])
 AC_SUBST([libpciaccess_CFLAGS])
 AC_SUBST([libpciaccess_LIBS])
 
+dnl Check for Kokkos parallel computing framework
+AC_ARG_WITH([kokkos],
+  [AS_HELP_STRING([--without-kokkos], [disable Kokkos parallel computing framework])], , [with_kokkos=yes])
+
+AS_IF([test "x$with_kokkos" != xno], [
+  dnl Try pkg-config first
+  PKG_CHECK_MODULES([kokkos], [kokkos], [HAVE_KOKKOS=yes], [
+    dnl Fallback: check for Kokkos headers and libraries manually
+    AC_CHECK_HEADER([Kokkos_Core.hpp], [
+      AC_CHECK_LIB([kokkos], [main], [
+        HAVE_KOKKOS=yes
+        kokkos_LIBS="-lkokkos"
+        kokkos_CFLAGS=""
+      ], [HAVE_KOKKOS=no])
+    ], [HAVE_KOKKOS=no])
+  ])
+], [HAVE_KOKKOS=no])
+
+AC_SUBST([HAVE_KOKKOS])
+AC_SUBST([kokkos_CFLAGS])
+AC_SUBST([kokkos_LIBS])
+
 AC_ARG_WITH([acpica],
   [AS_HELP_STRING([--without-acpica], [disable acpica])], , [with_acpica=yes])
 
