@@ -12,7 +12,7 @@ on:
     paths:
       - 'SKZ_INTEGRATION_STRATEGY.md'
     branches:
-      - main
+      - master
 
 jobs:
   generate-issues:
