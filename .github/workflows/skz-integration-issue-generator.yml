@@ -42,8 +42,8 @@ jobs:
             for (let i = 0; i < lines.length; i++) {
               const line = lines[i].trim();
               
-              // Detect phase headers (e.g., "#### Phase 1: Foundation Setup")
-              if (line.match(/^#### Phase \d+:/)) {
+              // Detect phase headers (e.g., "### Phase 1: Foundation Setup")
+              if (line.match(/^### Phase \d+:/)) {
                 // Save previous phase if exists
                 if (currentPhase) {
                   phases.push({
@@ -53,7 +53,7 @@ jobs:
                 }
                 
                 // Start new phase
-                const phaseMatch = line.match(/^#### (Phase \d+): (.+)/);
+                const phaseMatch = line.match(/^### (Phase \d+): (.+)/);
                 if (phaseMatch) {
                   currentPhase = {
                     id: phaseMatch[1].toLowerCase().replace(' ', '-'),
