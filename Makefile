@@ -366,6 +366,11 @@ kokkos-test:
 	@echo "🧪 === Kokkos Integration Test Suite === 🧪"
 	$(MAKE) -C performance/kokkos-integration test
 
+# SKZ-Kokkos compatibility verification
+kokkos-compatibility:
+	@echo "🔍 === SKZ Framework Compatibility Verification === 🔍"
+	$(MAKE) -C performance/kokkos-integration compatibility
+
 # Complete cognitive system test
 cognitive-test: cognitive-demo hurdcog-bootstrap
 	@echo "✅ Cognitive architecture integration complete"
@@ -428,4 +433,4 @@ cognitive-complete-test: cognitive-test cognitive-phase2-test cognitive-phase3-t
 	@echo "  ✅ Phase 3: Full Integration"
 	@echo "🤝 The cognitive hand has achieved COMPLETE grip on reality!"
 
-.PHONY: hurdcog-bootstrap cognitive-demo cognitive-test kokkos-demo kokkos-test hurdcog-phase2 test-truthkernel test-darwincore test-schedspace cognitive-phase2-test hurdcog-phase3 test-9p-hypergraph test-limbo-grammar test-distributed-scheduling cognitive-phase3-test cognitive-complete-test
+.PHONY: hurdcog-bootstrap cognitive-demo cognitive-test kokkos-demo kokkos-test kokkos-compatibility hurdcog-phase2 test-truthkernel test-darwincore test-schedspace cognitive-phase2-test hurdcog-phase3 test-9p-hypergraph test-limbo-grammar test-distributed-scheduling cognitive-phase3-test cognitive-complete-test
