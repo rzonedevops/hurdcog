@@ -40,7 +40,7 @@ jobs:
           
       - name: Setup Build Environment
         run: |
-          echo "ROOT_DIR=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
+          echo "ROOT_DIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           mkdir -p $ROOT_DIR/inst
           mkdir build
           
@@ -99,7 +99,7 @@ jobs:
           
       - name: Setup Build Environment
         run: |
-          echo "ROOT_DIR=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
+          echo "ROOT_DIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           mkdir -p $ROOT_DIR/inst
           mkdir build
           
