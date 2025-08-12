@@ -43,6 +43,11 @@ jobs:
           mkdir -p $GITHUB_WORKSPACE/inst
           mkdir -p $GITHUB_WORKSPACE/build
 
+      - name: Bootstrap Autotools
+        run: |
+          cd $GITHUB_WORKSPACE
+          autoreconf -i
+    
       - name: Configure GNU Hurd
         run: |
           cd $GITHUB_WORKSPACE/build
@@ -99,6 +104,11 @@ jobs:
         run: |
           mkdir -p $GITHUB_WORKSPACE/inst
           mkdir -p $GITHUB_WORKSPACE/build
+
+      - name: Bootstrap Autotools
+        run: |
+          cd $GITHUB_WORKSPACE
+          autoreconf -i
 
       - name: Configure GNU Hurd with ASAN
         run: |
