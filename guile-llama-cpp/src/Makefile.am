@@ -20,7 +20,7 @@
 
 BUILT_SOURCES =  llama_wrap.cxx
 
-EXTRA_DIST = llama.i guile_typemap.i notes.txt llama_c_header.h
+EXTRA_DIST = llama.i guile_typemap.i notes.txt llama_c_header.h ecma262.scm
 llama_wrap.cxx: $(abs_srcdir)/llama.i $(abs_srcdir)/guile_typemap.i $(abs_srcdir)/llama_c_header.h
 	$(SWIG) -c++ -guile -Linkage module -I${C_INCLUDE_PATH} $(abs_srcdir)/llama.i
 
