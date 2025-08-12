@@ -12,6 +12,7 @@
   #:use-module (cogkernel cognitive-grip)
   #:use-module (cogkernel 9p-hypergraph)
   #:export (make-process-namespace
+            make-plan9-namespace
             process-namespace?
             namespace-mount!
             namespace-unmount!
@@ -65,6 +66,13 @@
       (format #t "Error creating process namespace: ~a ~a~%" key args)
       ;; Return a minimal valid namespace on error
       (make-process-namespace-record pid (make-hash-table) (make-hash-table) '(root) #f))))
+
+;;; Plan9 compatibility constructor
+(define (make-plan9-namespace pid #:optional (parent #f))
+  "Create a Plan9-compatible namespace for a process"
+  (if parent
+      (make-process-namespace pid #:inherit-global #t)
+      (make-process-namespace pid #:inherit-global #f)))
 
 ;;; Global mount table and namespace manager
 (define *global-mounts* (make-hash-table))
