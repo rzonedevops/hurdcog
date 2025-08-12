@@ -58,7 +58,8 @@ prog-subdirs = auth proc exec term \
 	       devnode \
 	       eth-multiplexer \
 	       shutdown \
-	       rtc
+	       rtc \
+	       9pfs
 
 ifeq ($(HAVE_LIBRUMP),yes)
 prog-subdirs += rumpdisk

@@ -574,6 +574,92 @@ cleanup:
     return ret;
 }
 
+/* Write to file */
+ssize_t
+p9_write(struct p9_fid *fid, const void *buf, size_t count, uint64_t offset)
+{
+    struct p9_message *tmsg, *rmsg;
+    uint8_t *msgbuf;
+    size_t len;
+    uint16_t tag;
+    uint32_t wcount;
+    ssize_t ret = -1;
+    
+    if (!fid || !buf || !fid->open) {
+        p9_errno = P9_EINVAL;
+        return -1;
+    }
+    
+    /* Allocate message */
+    len = 4 + 1 + 2 + 4 + 8 + 4 + count;
+    tmsg = malloc(sizeof(struct p9_message) + len);
+    if (!tmsg) {
+        p9_errno = P9_ENOMEM;
+        return -1;
+    }
+    
+    /* Build Twrite message */
+    tag = p9_alloc_tag(fid->conn);
+    tmsg->size = len;
+    tmsg->type = P9_TWRITE;
+    tmsg->tag = tag;
+    
+    msgbuf = tmsg->data;
+    len = tmsg->size - 7;
+    
+    /* Encode FID */
+    *(uint32_t*)msgbuf = fid->fid;
+    msgbuf += 4;
+    len -= 4;
+    
+    /* Encode offset */
+    *(uint64_t*)msgbuf = offset;
+    msgbuf += 8;
+    len -= 8;
+    
+    /* Encode count */
+    *(uint32_t*)msgbuf = count;
+    msgbuf += 4;
+    len -= 4;
+    
+    /* Encode data */
+    memcpy(msgbuf, buf, count);
+    msgbuf += count;
+    len -= count;
+    
+    /* Send request and receive response */
+    rmsg = p9_rpc(fid->conn, tmsg);
+    if (!rmsg) {
+        p9_errno = P9_EIO;
+        goto cleanup;
+    }
+    
+    /* Verify response type */
+    if (rmsg->type != P9_RWRITE) {
+        p9_errno = P9_EPROTO;
+        goto cleanup_rmsg;
+    }
+    
+    /* Decode response */
+    msgbuf = rmsg->data;
+    len = rmsg->size - 7;
+    
+    if (len < 4) {
+        p9_errno = P9_EPROTO;
+        goto cleanup_rmsg;
+    }
+    
+    wcount = *(uint32_t*)msgbuf;
+    ret = wcount;
+    
+cleanup_rmsg:
+    p9_free_message(rmsg);
+cleanup:
+    p9_free_tag(fid->conn, tag);
+    free(tmsg);
+    return ret;
+}
+
 /* Close a FID */
 int
 p9_clunk(struct p9_fid *fid)
