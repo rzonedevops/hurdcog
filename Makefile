@@ -31,6 +31,9 @@ cognitive-subdirs = cogkernel
 # Performance optimization subdirectories
 performance-subdirs = performance/kokkos-integration
 
+# Development tools subdirectories
+development-subdirs = development/compiler-explorer
+
 # Hurd libraries
 lib-subdirs = libshouldbeinlibc libihash libiohelp libports \
 	      libpager libfshelp libdiskfs libtrivfs libps \
@@ -80,7 +83,7 @@ endif
 other-subdirs = hurd doc config release include
 
 # All the subdirectories together
-subdirs = $(cognitive-subdirs) $(performance-subdirs) $(lib-subdirs) $(prog-subdirs) $(other-subdirs)
+subdirs = $(cognitive-subdirs) $(development-subdirs) $(performance-subdirs) $(lib-subdirs) $(prog-subdirs) $(other-subdirs)
 
 # This allows the creation of a file BROKEN in any of the prog-subdirs;
 # that will prevent this top level Makefile from attempting to make it.
@@ -366,6 +369,22 @@ kokkos-test:
 	@echo "🧪 === Kokkos Integration Test Suite === 🧪"
 	$(MAKE) -C performance/kokkos-integration test
 
+# Compiler Explorer JIT infrastructure - Phase 2 implementation
+compiler-explorer-jit:
+	@echo "⚡ === Compiler Explorer JIT Infrastructure === ⚡"
+	@echo "Phase 2: Microkernel Integration - JIT Compilation"
+	$(MAKE) -C development/compiler-explorer all
+
+# Test JIT infrastructure
+test-jit:
+	@echo "🧪 === JIT Infrastructure Test Suite === 🧪"
+	$(MAKE) -C development/compiler-explorer test
+
+# JIT demo
+jit-demo:
+	@echo "🚀 === JIT Infrastructure Demo === 🚀"
+	$(MAKE) -C development/compiler-explorer demo
+
 # SKZ-Kokkos compatibility verification
 kokkos-compatibility:
 	@echo "🔍 === SKZ Framework Compatibility Verification === 🔍"
@@ -433,4 +452,4 @@ cognitive-complete-test: cognitive-test cognitive-phase2-test cognitive-phase3-t
 	@echo "  ✅ Phase 3: Full Integration"
 	@echo "🤝 The cognitive hand has achieved COMPLETE grip on reality!"
 
-.PHONY: hurdcog-bootstrap cognitive-demo cognitive-test kokkos-demo kokkos-test kokkos-compatibility hurdcog-phase2 test-truthkernel test-darwincore test-schedspace cognitive-phase2-test hurdcog-phase3 test-9p-hypergraph test-limbo-grammar test-distributed-scheduling cognitive-phase3-test cognitive-complete-test
+.PHONY: hurdcog-bootstrap cognitive-demo cognitive-test kokkos-demo kokkos-test kokkos-compatibility compiler-explorer-jit test-jit jit-demo hurdcog-phase2 test-truthkernel test-darwincore test-schedspace cognitive-phase2-test hurdcog-phase3 test-9p-hypergraph test-limbo-grammar test-distributed-scheduling cognitive-phase3-test cognitive-complete-test
