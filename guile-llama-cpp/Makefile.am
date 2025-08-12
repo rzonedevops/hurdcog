@@ -22,10 +22,13 @@ SUBDIRS = src
 
 bin_SCRIPTS = scripts/chat.scm \
     scripts/simple.scm \
-    scripts/tokenize.scm
+    scripts/tokenize.scm \
+    scripts/ecma262-bridge.scm
 
 NOCOMP_SOURCES = $(bin_SCRIPTS) scripts/init_common.scm \
     scripts/utils.scm
+
+SOURCES = src/ecma262.scm
 
 
 # Handle substitution of fully-expanded Autoconf variables.
@@ -54,7 +57,7 @@ nobase_go_DATA = $(GOBJECTS)
 guile_install_go_files = install-nobase_goDATA
 $(guile_install_go_files): install-nobase_modDATA
 
-EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES) License
+EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES) License docs/ECMA262_INTEGRATION.md examples/ecma262-llm-example.js
 
 GUILE_WARNINGS = -Wunbound-variable -Warity-mismatch -Wformat
 SUFFIXES = .scm .go

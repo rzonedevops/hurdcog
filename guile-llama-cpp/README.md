@@ -45,6 +45,8 @@ commands to build.
 
 ## run
 
+### Basic LLM Chat
+
 To use guile_llama_cpp to chat with a LLM (Large Language Model), you need to first download a LLM in gguf format.
 See instructions on the web such as https://stackoverflow.com/questions/67595500/how-to-download-a-model-from-huggingface
 
@@ -68,6 +70,21 @@ chat.scm [-v] [-h]
  -m model_path
  -p prompt
 
+### ECMA-262 JavaScript Integration
+
+You can also use modern JavaScript features with LLM operations:
+
+```bash
+# Run ECMA-262 demo
+./pre-inst-env scripts/ecma262-bridge.scm demo Phi-3-mini-4k-instruct-q4.gguf
+
+# Execute JavaScript code with LLM
+./pre-inst-env scripts/ecma262-bridge.scm exec Phi-3-mini-4k-instruct-q4.gguf "ECMA.llm.prompt('What is AI?')"
+
+# Test the JavaScript example
+node examples/ecma262-llm-example.js
+```
+
 
 in the build directory, pretend the command with
 
@@ -75,7 +92,41 @@ in the build directory, pretend the command with
 
 as it sets up the needed paths and environment variables for proper guile invocation.
 
+## features
+
+* **Core LLM Operations**: Simple Guile scripts for LLM chat interaction with gguf format models
+* **ECMA-262 JavaScript Integration**: Modern JavaScript language features for LLM interaction
+* **Interactive Chat**: Command-line based conversation with LLMs
+* **Configurable Parameters**: Full control over chat parameters (context length, prediction length, etc.)
+* **GNU Guile Integration**: Seamless integration with Guile Scheme ecosystem
+
+## ECMA-262 JavaScript Integration
+
+guile_llama_cpp now includes comprehensive ECMA-262 JavaScript support, allowing you to use modern JavaScript features with LLM operations:
+
+```javascript
+// Modern JavaScript syntax with LLM
+const result = await ECMA.llm.prompt(`Explain ${"machine learning"} in simple terms`);
+
+// Array processing for batch operations
+const topics = ["AI", "ML", "DL"];
+const responses = topics.map(topic => ECMA.llm.prompt(`Define ${topic}`));
+
+// Configuration with destructuring
+const config = ECMA.config.createLLMConfig({ temperature: 0.8, maxTokens: 100 });
+```
+
+See [ECMA262_INTEGRATION.md](docs/ECMA262_INTEGRATION.md) for complete documentation.
+
 ## roadmap
+
+* support for interactive, continuous chat
+* support for expose the LLM as a web end point, using a web server built in Guile, so
+  the LLM can be exposed via a web interface, to allow chatting with remote users
+* support for embedding LLMs in Guile programs for scenarios like LLM driven software
+  agents
+* **Enhanced ECMA-262 Integration**: WebAssembly support, streaming operations, browser integration
+* **SKZ Framework Integration**: Full integration with SKZ autonomous agents framework
 
 * support for interactive, continuous chat
 * support for expose the LLM as a web end point, using a web server built in Guile, so
