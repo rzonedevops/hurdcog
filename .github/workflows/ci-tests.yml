@@ -40,23 +40,21 @@ jobs:
           
       - name: Setup Build Environment
         run: |
-          echo "ROOT_DIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
-          mkdir -p $ROOT_DIR/inst
-          mkdir build
-          
+          mkdir -p $GITHUB_WORKSPACE/inst
+          mkdir -p $GITHUB_WORKSPACE/build
+
       - name: Configure GNU Hurd
         run: |
-          cd build
-          ../configure --host=i686-gnu --prefix=$ROOT_DIR/inst
-          
+          cd $GITHUB_WORKSPACE/build
+          ../configure --host=i686-gnu --prefix=$GITHUB_WORKSPACE/inst
+
       - name: Build and Test GNU Hurd
         run: |
-          cd build
+          cd $GITHUB_WORKSPACE/build
           make -j$(nproc)
           make check
         env:
-          CTEST_OUTPUT_ON_FAILURE: On
-          
+          CTEST_OUTPUT_ON_FAILURE: On          
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -99,18 +97,20 @@ jobs:
           
       - name: Setup Build Environment
         run: |
-          echo "ROOT_DIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
-          mkdir -p $ROOT_DIR/inst
-          mkdir build
-          
+          mkdir -p $GITHUB_WORKSPACE/inst
+          mkdir -p $GITHUB_WORKSPACE/build
+
       - name: Configure GNU Hurd with ASAN
         run: |
-          cd build
-          ../configure --host=i686-gnu --prefix=$ROOT_DIR/inst CFLAGS="-fsanitize=address" CXXFLAGS="-fsanitize=address" LDFLAGS="-fsanitize=address"
-          
+          cd $GITHUB_WORKSPACE/build
+          ../configure --host=i686-gnu --prefix=$GITHUB_WORKSPACE/inst \
+            CFLAGS="-fsanitize=address" \
+            CXXFLAGS="-fsanitize=address" \
+            LDFLAGS="-fsanitize=address"
+
       - name: Build and Test GNU Hurd with ASAN
         run: |
-          cd build
+          cd $GITHUB_WORKSPACE/build
           make -j$(nproc)
           make check
         env:
