@@ -31,7 +31,9 @@ jobs:
             gcc-multilib \
             g++-multilib \
             libc6-dev-i386 \
-            linux-libc-dev
+            linux-libc-dev \
+            bison \
+            flex
 #            linux-libc-dev:i386
             
       - name: Install Language Packs
@@ -42,6 +44,20 @@ jobs:
         run: |
           mkdir -p $GITHUB_WORKSPACE/inst
           mkdir -p $GITHUB_WORKSPACE/build
+
+      - name: Build GNU MiG
+        run: |
+          # Create machine symlink for Mach headers
+          cd $GITHUB_WORKSPACE/external/unicorn-forest-repos/gnumach/include/mach
+          ln -sf ../../i386/include/mach/i386 machine
+          # Build MiG with proper header paths
+          cd $GITHUB_WORKSPACE/mig
+          autoreconf -i
+          ./configure --prefix=$GITHUB_WORKSPACE/inst
+          make -j$(nproc) TARGET_CPPFLAGS="-I../external/unicorn-forest-repos/gnumach/include -I../external/unicorn-forest-repos/gnumach/i386/include"
+          make install
+          # Add MiG to PATH for subsequent steps
+          echo "$GITHUB_WORKSPACE/inst/bin" >> $GITHUB_PATH
 
       - name: Bootstrap Autotools
         run: |
@@ -93,7 +109,9 @@ jobs:
             gcc-multilib \
             g++-multilib \
             libc6-dev-i386 \
-            linux-libc-dev
+            linux-libc-dev \
+            bison \
+            flex
 #            linux-libc-dev:i386
             
       - name: Install Language Packs
@@ -104,6 +122,20 @@ jobs:
         run: |
           mkdir -p $GITHUB_WORKSPACE/inst
           mkdir -p $GITHUB_WORKSPACE/build
+
+      - name: Build GNU MiG
+        run: |
+          # Create machine symlink for Mach headers
+          cd $GITHUB_WORKSPACE/external/unicorn-forest-repos/gnumach/include/mach
+          ln -sf ../../i386/include/mach/i386 machine
+          # Build MiG with proper header paths
+          cd $GITHUB_WORKSPACE/mig
+          autoreconf -i
+          ./configure --prefix=$GITHUB_WORKSPACE/inst
+          make -j$(nproc) TARGET_CPPFLAGS="-I../external/unicorn-forest-repos/gnumach/include -I../external/unicorn-forest-repos/gnumach/i386/include"
+          make install
+          # Add MiG to PATH for subsequent steps
+          echo "$GITHUB_WORKSPACE/inst/bin" >> $GITHUB_PATH
 
       - name: Bootstrap Autotools
         run: |
