@@ -67,7 +67,7 @@ jobs:
       - name: Configure GNU Hurd
         run: |
           cd $GITHUB_WORKSPACE/build
-          ../configure --host=i686-gnu --prefix=$GITHUB_WORKSPACE/inst
+          ../configure --host=i686-gnu --prefix=$GITHUB_WORKSPACE/inst --without-parted
 
       - name: Build and Test GNU Hurd
         run: |
@@ -146,6 +146,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/build
           ../configure --host=i686-gnu --prefix=$GITHUB_WORKSPACE/inst \
+            --without-parted \
             CFLAGS="-fsanitize=address" \
             CXXFLAGS="-fsanitize=address" \
             LDFLAGS="-fsanitize=address"
