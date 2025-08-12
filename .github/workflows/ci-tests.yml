@@ -31,8 +31,8 @@ jobs:
             gcc-multilib \
             g++-multilib \
             libc6-dev-i386 \
-            linux-libc-dev \
-            linux-libc-dev:i386
+            linux-libc-dev
+#            linux-libc-dev:i386
             
       - name: Install Language Packs
         run: |
@@ -90,8 +90,8 @@ jobs:
             gcc-multilib \
             g++-multilib \
             libc6-dev-i386 \
-            linux-libc-dev \
-            linux-libc-dev:i386
+            linux-libc-dev
+#            linux-libc-dev:i386
             
       - name: Install Language Packs
         run: |
