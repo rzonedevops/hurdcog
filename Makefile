@@ -42,6 +42,7 @@ lib-subdirs = libshouldbeinlibc libihash libiohelp libports \
 	      libbpf \
 	      libmachdev \
 	      libirqhelp \
+	      lib9p \
 
 # Hurd programs
 prog-subdirs = auth proc exec term \
