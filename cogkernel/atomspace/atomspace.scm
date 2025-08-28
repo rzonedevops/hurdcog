@@ -24,6 +24,8 @@
             atomspace-tensor-shape
             make-atomspace
             atomspace?
+            atomspace-atoms
+            atomspace-links
             *global-atomspace*))
 
 ;;; Atom types for the cognitive kernel
@@ -39,7 +41,12 @@
     TASK
     AGENT
     RULE
-    SCRIPT))
+    SCRIPT
+    MESSAGE
+    NETWORK
+    EXPERIENCE
+    PATTERN
+    COMPONENT))
 
 ;;; Link types for hypergraph connections
 (define link-types
