@@ -42,6 +42,7 @@ lib-subdirs = libshouldbeinlibc libihash libiohelp libports \
 	      libbpf \
 	      libmachdev \
 	      libirqhelp \
+	      lib9p \
 
 # Hurd programs
 prog-subdirs = auth proc exec term \
@@ -57,7 +58,8 @@ prog-subdirs = auth proc exec term \
 	       devnode \
 	       eth-multiplexer \
 	       shutdown \
-	       rtc
+	       rtc \
+	       9pfs
 
 ifeq ($(HAVE_LIBRUMP),yes)
 prog-subdirs += rumpdisk
