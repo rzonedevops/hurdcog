@@ -28,6 +28,9 @@ include ./Makeconf
 # Cognitive Kernel - Self-evolving scaffolding for GNU Hurd
 cognitive-subdirs = cogkernel
 
+# GUIX Build System with Atomspace Filesystem
+guix-subdirs = guix-build-system/atomspace-fs
+
 # Performance optimization subdirectories
 performance-subdirs = performance/kokkos-integration
 
