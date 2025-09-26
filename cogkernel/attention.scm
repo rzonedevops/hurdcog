@@ -102,39 +102,44 @@
     (list focused-atoms focused-agents)))
 
 ;;; Allocate attention resources
-(define (attention-bank-allocate! bank)
-  "Perform attention allocation spreading and decay"
-  (let ((total-sti 0)
-        (decay-rate 0.05))
-    
-    ;; Calculate total STI and apply decay
-    (hash-for-each
-      (lambda (name av)
-        (let ((current-sti (attention-value-sti av)))
-          (set! total-sti (+ total-sti current-sti))
-          ;; Apply decay
-          (set-attention-value-sti! av (* current-sti (- 1 decay-rate)))))
-      (attention-bank-atom-av bank))
-    
-    (hash-for-each
-      (lambda (id av)
-        (let ((current-sti (attention-value-sti av)))
-          (set! total-sti (+ total-sti current-sti))
-          ;; Apply decay
-          (set-attention-value-sti! av (* current-sti (- 1 decay-rate)))))
-      (attention-bank-agent-av bank))
-    
-    ;; Normalize if total exceeds funds
-    (when (> total-sti (attention-bank-total-funds bank))
-      (let ((scale-factor (/ (attention-bank-total-funds bank) total-sti)))
+(define* (attention-bank-allocate! bank #:optional item amount)
+  "Perform attention allocation spreading and decay, or allocate specific amount to item"
+  (if (and item amount)
+      ; Allocate specific amount to item
+      (let ((av (make-attention-value amount (quotient amount 2) (quotient amount 4))))
+        (attention-bank-add! bank item av))
+      ; Perform general allocation and decay
+      (let ((total-sti 0)
+            (decay-rate 0.05))
+        
+        ;; Calculate total STI and apply decay
         (hash-for-each
           (lambda (name av)
-            (set-attention-value-sti! av (* (attention-value-sti av) scale-factor)))
+            (let ((current-sti (attention-value-sti av)))
+              (set! total-sti (+ total-sti current-sti))
+              ;; Apply decay
+              (set-attention-value-sti! av (* current-sti (- 1 decay-rate)))))
           (attention-bank-atom-av bank))
+        
         (hash-for-each
           (lambda (id av)
-            (set-attention-value-sti! av (* (attention-value-sti av) scale-factor)))
-          (attention-bank-agent-av bank))))))
+            (let ((current-sti (attention-value-sti av)))
+              (set! total-sti (+ total-sti current-sti))
+              ;; Apply decay
+              (set-attention-value-sti! av (* current-sti (- 1 decay-rate)))))
+          (attention-bank-agent-av bank))
+        
+        ;; Normalize if total exceeds funds
+        (when (> total-sti (attention-bank-total-funds bank))
+          (let ((scale-factor (/ (attention-bank-total-funds bank) total-sti)))
+            (hash-for-each
+              (lambda (name av)
+                (set-attention-value-sti! av (* (attention-value-sti av) scale-factor)))
+              (attention-bank-atom-av bank))
+            (hash-for-each
+              (lambda (id av)
+                (set-attention-value-sti! av (* (attention-value-sti av) scale-factor)))
+              (attention-bank-agent-av bank)))))))
 
 ;;; Stimulate attention for important events
 (define (attention-bank-stimulate! bank item stimulus-type intensity)
