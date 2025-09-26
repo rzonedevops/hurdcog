@@ -27,6 +27,8 @@
             agent-system-tensor-shape
             agent-system-enable-communication!
             agent-system-broadcast!
+            agent-system-enable-distributed-framework!
+            agent-system-get-framework
             *global-agent-system*))
 
 ;;; Agent roles for different system functions
@@ -63,12 +65,13 @@
 
 ;;; Agent system for coordinating multiple agents
 (define-record-type <agent-system>
-  (make-agent-system-record agents tensor-shape execution-queue communication-system)
+  (make-agent-system-record agents tensor-shape execution-queue communication-system distributed-framework)
   agent-system?
   (agents agent-system-agents)
   (tensor-shape agent-system-tensor-shape)
   (execution-queue agent-system-execution-queue)
-  (communication-system agent-system-communication-system set-agent-system-communication-system!))
+  (communication-system agent-system-communication-system set-agent-system-communication-system!)
+  (distributed-framework agent-system-distributed-framework set-agent-system-distributed-framework!))
 
 ;;; Create a new agent
 (define* (make-agent id role #:optional (environment '()) (actions '()))
@@ -104,7 +107,7 @@
 ;;; Create a new agent system
 (define* (make-agent-system #:optional (tensor-shape '(10 8 10 4)))
   "Create a new agent system with tensor dimensions [n_agents x n_roles x n_actions x n_envs]"
-  (make-agent-system-record (make-hash-table) tensor-shape '() #f))
+  (make-agent-system-record (make-hash-table) tensor-shape '() #f #f))
 
 ;;; Add agent to system
 (define (agent-system-add! agent-system agent)
@@ -280,4 +283,40 @@
                   (unless (string=? agent-id from-agent-id)
                     (format #t "  -> ~a~%" agent-id)))
                 (agent-system-agents agent-system)))))
-        (format #t "❌ No communication system enabled~%"))))
+        (format #t "❌ No communication system enabled~%")))
+
+;;; Enable distributed agent framework for agent system
+(define (agent-system-enable-distributed-framework! agent-system)
+  "Enable distributed agent framework for the agent system"
+  (catch #t
+    (lambda ()
+      ;; Load distributed framework module
+      (eval '(use-modules (cogkernel distributed-agent-framework)) (interaction-environment))
+      
+      ;; Get framework creation and start procedures
+      (let ((framework-proc (module-ref (resolve-module '(cogkernel distributed-agent-framework))
+                                       'make-distributed-agent-framework))
+            (start-proc (module-ref (resolve-module '(cogkernel distributed-agent-framework))
+                                   'framework-start!)))
+        
+        ;; Create and start framework
+        (let ((framework (framework-proc #:deployment-strategy 'DISTRIBUTED)))
+          (set-agent-system-distributed-framework! agent-system framework)
+          (start-proc framework)
+          
+          ;; Register existing agents in framework
+          (hash-for-each
+            (lambda (agent-id agent)
+              (format #t "🚀 Registering agent ~a in distributed framework~%" agent-id))
+            (agent-system-agents agent-system))
+          
+          (format #t "✅ Distributed agent framework enabled for agent system~%")
+          framework)))
+    (lambda (key . args)
+      (format #t "⚠️  Could not enable distributed framework: ~a~%" args)
+      #f)))
+
+;;; Get distributed framework from agent system
+(define (agent-system-get-framework agent-system)
+  "Get the distributed framework instance from agent system"
+  (agent-system-distributed-framework agent-system))
