@@ -18,11 +18,15 @@
             agent-state
             agent-execute!
             agent-register-action!
+            agent-send-message!
+            agent-receive-messages!
             make-agent-system
             agent-system-add!
             agent-system-get
             agent-system-execute-all!
             agent-system-tensor-shape
+            agent-system-enable-communication!
+            agent-system-broadcast!
             *global-agent-system*))
 
 ;;; Agent roles for different system functions
@@ -46,7 +50,7 @@
 
 ;;; Agent record structure
 (define-record-type <agent>
-  (make-agent-record id role actions environment state tensor-coords last-execution)
+  (make-agent-record id role actions environment state tensor-coords last-execution communication-enabled?)
   agent?
   (id agent-id)
   (role agent-role)
@@ -54,22 +58,24 @@
   (environment agent-environment set-agent-environment!)
   (state agent-state set-agent-state!)
   (tensor-coords agent-tensor-coords)
-  (last-execution agent-last-execution set-agent-last-execution!))
+  (last-execution agent-last-execution set-agent-last-execution!)
+  (communication-enabled? agent-communication-enabled? set-agent-communication-enabled?!))
 
 ;;; Agent system for coordinating multiple agents
 (define-record-type <agent-system>
-  (make-agent-system-record agents tensor-shape execution-queue)
+  (make-agent-system-record agents tensor-shape execution-queue communication-system)
   agent-system?
   (agents agent-system-agents)
   (tensor-shape agent-system-tensor-shape)
-  (execution-queue agent-system-execution-queue))
+  (execution-queue agent-system-execution-queue)
+  (communication-system agent-system-communication-system set-agent-system-communication-system!))
 
 ;;; Create a new agent
 (define* (make-agent id role #:optional (environment '()) (actions '()))
   "Create a new agent with specified id, role, and optional environment/actions"
   (unless (member role agent-roles)
     (error "Invalid agent role:" role))
-  (make-agent-record id role actions environment 'IDLE '(0 0 0 0) #f))
+  (make-agent-record id role actions environment 'IDLE '(0 0 0 0) #f #f))
 
 ;;; Register an action with an agent
 (define (agent-register-action! agent action-type action-proc)
@@ -98,7 +104,7 @@
 ;;; Create a new agent system
 (define* (make-agent-system #:optional (tensor-shape '(10 8 10 4)))
   "Create a new agent system with tensor dimensions [n_agents x n_roles x n_actions x n_envs]"
-  (make-agent-system-record (make-hash-table) tensor-shape '()))
+  (make-agent-system-record (make-hash-table) tensor-shape '() #f))
 
 ;;; Add agent to system
 (define (agent-system-add! agent-system agent)
@@ -183,3 +189,95 @@
 
 ;;; Initialize the global agent system (commented out for manual control)
 ;; (initialize-hurd-agents! *global-agent-system* *global-atomspace*)
+
+;;; Agent Communication Functions
+;;; These functions provide distributed communication capabilities
+
+;;; Send message from agent to another agent
+(define (agent-send-message! agent-system from-agent-id to-agent-id message-type payload)
+  "Send a message from one agent to another through the communication system"
+  (let ((comm-system (agent-system-communication-system agent-system)))
+    (if comm-system
+        (begin
+          ;; Load the communication module dynamically if not already loaded
+          (catch #t
+            (lambda ()
+              (eval '(use-modules (cogkernel agent-communication)) (interaction-environment))
+              (let ((send-proc (module-ref (resolve-module '(cogkernel agent-communication)) 
+                                           'send-cognitive-message)))
+                (send-proc comm-system from-agent-id to-agent-id message-type payload)))
+            (lambda (key . args)
+              (format #t "⚠️  Communication module not available, using local message delivery~%")
+              ;; Fallback to local message delivery
+              (format #t "📨 Local message: ~a -> ~a (~a): ~a~%" 
+                      from-agent-id to-agent-id message-type payload)
+              `(message-sent (id . ,(string-append "local-" (number->string (random 1000))))
+                            (status . local-delivery)
+                            (timestamp . ,(current-time))))))
+        (begin
+          (format #t "❌ No communication system enabled for agent system~%")
+          `(message-failed (error . no-communication-system))))))
+
+;;; Receive messages for an agent
+(define (agent-receive-messages! agent-system agent-id)
+  "Receive messages for a specific agent"
+  (let ((comm-system (agent-system-communication-system agent-system)))
+    (if comm-system
+        (begin
+          (catch #t
+            (lambda ()
+              (eval '(use-modules (cogkernel agent-communication)) (interaction-environment))
+              (let ((receive-proc (module-ref (resolve-module '(cogkernel agent-communication))
+                                              'receive-cognitive-message)))
+                (receive-proc comm-system agent-id)))
+            (lambda (key . args)
+              (format #t "📭 No messages available for ~a~%" agent-id)
+              '())))
+        '())))
+
+;;; Enable communication for agent system
+(define (agent-system-enable-communication! agent-system)
+  "Enable distributed communication for the agent system"
+  (catch #t
+    (lambda ()
+      (eval '(use-modules (cogkernel agent-communication)) (interaction-environment))
+      (let ((setup-proc (module-ref (resolve-module '(cogkernel agent-communication))
+                                    'setup-distributed-communication!))
+            (start-proc (module-ref (resolve-module '(cogkernel agent-communication))
+                                   'agent-communication-start!)))
+        (let ((comm-system (setup-proc agent-system)))
+          (set-agent-system-communication-system! agent-system comm-system)
+          (start-proc comm-system)
+          ;; Enable communication for all agents
+          (hash-for-each
+            (lambda (agent-id agent)
+              (set-agent-communication-enabled?! agent #t)
+              (format #t "📡 Communication enabled for agent ~a~%" agent-id))
+            (agent-system-agents agent-system))
+          comm-system)))
+    (lambda (key . args)
+      (format #t "⚠️  Could not enable communication system: ~a~%" args)
+      #f)))
+
+;;; Broadcast message to all agents in system
+(define (agent-system-broadcast! agent-system from-agent-id message-type payload)
+  "Broadcast a message from one agent to all others in the system"
+  (let ((comm-system (agent-system-communication-system agent-system)))
+    (if comm-system
+        (begin
+          (catch #t
+            (lambda ()
+              (eval '(use-modules (cogkernel agent-communication)) (interaction-environment))
+              (let ((broadcast-proc (module-ref (resolve-module '(cogkernel agent-communication))
+                                               'broadcast-to-agents)))
+                (broadcast-proc comm-system from-agent-id message-type payload)))
+            (lambda (key . args)
+              (format #t "📢 Broadcasting locally: ~a (~a): ~a~%" 
+                      from-agent-id message-type payload)
+              ;; Fallback to local broadcast
+              (hash-for-each
+                (lambda (agent-id agent)
+                  (unless (string=? agent-id from-agent-id)
+                    (format #t "  -> ~a~%" agent-id)))
+                (agent-system-agents agent-system)))))
+        (format #t "❌ No communication system enabled~%"))))

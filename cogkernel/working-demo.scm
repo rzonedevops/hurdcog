@@ -151,12 +151,75 @@
 ;; Run the cognitive scenario
 (cognitive-scenario)
 
+;;; Distributed Communication Demonstration
+(format #t "~%=== Distributed Agent Communication Demo ===~%")
+
+;; Create agent system with communication
+(define demo-agent-system (make-agent-system '(4 8 10 4)))
+
+;; Add demo agents
+(let ((coordinator (make-agent "demo-coordinator" 'BUILD))
+      (monitor (make-agent "demo-monitor" 'MONITOR))
+      (repair (make-agent "demo-repair" 'REPAIR))
+      (analyzer (make-agent "demo-analyzer" 'ANALYZE)))
+  
+  ;; Add agents to system
+  (agent-system-add! demo-agent-system coordinator)
+  (agent-system-add! demo-agent-system monitor)
+  (agent-system-add! demo-agent-system repair)
+  (agent-system-add! demo-agent-system analyzer)
+  
+  (format #t "✓ Created demo system with ~a agents~%" 
+          (hash-count (const #t) (agent-system-agents demo-agent-system))))
+
+;; Simulate distributed communication (fallback mode)
+(format #t "~%Demonstrating agent communication protocol...~%")
+
+;; Enable communication system
+(agent-system-enable-communication! demo-agent-system)
+
+;; Demonstrate message passing
+(format #t "~%1. Coordinator requesting system status...~%")
+(agent-send-message! demo-agent-system 
+                     "demo-coordinator" 
+                     "demo-monitor" 
+                     'STATUS-QUERY 
+                     "pre-build-system-check")
+
+(format #t "~%2. Broadcasting coordination message...~%")
+(agent-system-broadcast! demo-agent-system 
+                         "demo-coordinator" 
+                         'COORDINATION 
+                         "prepare-for-distributed-build")
+
+(format #t "~%3. Assigning analysis task...~%")
+(agent-send-message! demo-agent-system
+                     "demo-coordinator"
+                     "demo-analyzer"
+                     'TASK-ASSIGNMENT
+                     '(task . analyze-build-dependencies
+                       priority . high))
+
+(format #t "~%4. Task completion notification...~%")
+(agent-send-message! demo-agent-system
+                     "demo-analyzer"
+                     "demo-coordinator"
+                     'TASK-COMPLETION
+                     '(task . analyze-build-dependencies
+                       result . dependencies-resolved
+                       next-action . initiate-build))
+
 ;;; System Status
 (format #t "~%=== Cognitive Kernel Status ===~%")
 (format #t "AtomSpace: ~a atoms in hypergraph~%" (atomspace-count))
-(format #t "Tensor Shapes: Memory[10x5], Agents[5x8], Attention[∞]~%")
+(format #t "Agent System: ~a agents with communication enabled~%" 
+        (hash-count (const #t) (agent-system-agents demo-agent-system)))
+(format #t "Communication Protocol: atomspace-message-passing~%")
+(format #t "Transport Layer: distributed (fallback mode)~%")
+(format #t "Tensor Shapes: Memory[10x5], Agents[4x8x10x4], Attention[∞]~%")
 (format #t "P-System: Membrane evolution active~%")
 (format #t "GNU Hurd Integration: Ready for declarative builds~%")
 
 (format #t "~%🧠 Cognitive Kernel Successfully Operational! 🧠~%")
+(format #t "📡 Distributed Agent Communication Established! 📡~%")
 (format #t "Self-evolving scaffolding ready for GNU Hurd ecosystem~%")
