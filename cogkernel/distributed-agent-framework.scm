@@ -339,7 +339,7 @@
 
 (define (select-deployment-node framework agent-spec)
   "Select optimal node for agent deployment based on load balancing"
-  (let ((nodes (hash-keys (framework-node-registry framework))))
+  (let ((nodes (hash-fold (lambda (k v acc) (cons k acc)) '() (framework-node-registry framework))))
     (if (null? nodes)
         "local"  ; Default to local node if no nodes registered
         (car nodes)))) ; Simple selection - can be enhanced with load balancing
