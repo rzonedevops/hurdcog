@@ -28,7 +28,7 @@
     (format #t "✓ Framework started~%")
     
     ;; Deploy test agents
-    (framework-deploy-agent! framework '(test-agent-1 COMPUTE))
+    (framework-deploy-agent! framework '(test-agent-1 BUILD))
     (framework-deploy-agent! framework '(test-agent-2 MONITOR))
     (format #t "✓ Test agents deployed~%")
     

@@ -44,7 +44,9 @@
     PATTERN
     STATE-VALUE
     POLICY
-    META-PATTERN))
+    META-PATTERN
+    DEPLOYMENT
+    NODE))
 
 ;;; Link types for hypergraph connections
 (define link-types
