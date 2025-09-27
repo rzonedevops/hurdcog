@@ -455,4 +455,4 @@
     (format #t "[WORKFLOW-PERF] Total execution time: ~a seconds~%" total-time)
     (for-each (lambda (metric)
                 (format #t "[WORKFLOW-PERF]   ~a: ~a seconds~%" (car metric) (cdr metric)))
-              metrics)))
+              metrics)))))

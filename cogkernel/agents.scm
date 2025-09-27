@@ -283,7 +283,7 @@
                   (unless (string=? agent-id from-agent-id)
                     (format #t "  -> ~a~%" agent-id)))
                 (agent-system-agents agent-system)))))
-        (format #t "❌ No communication system enabled~%")))
+        (format #t "❌ No communication system enabled~%"))))
 
 ;;; Enable distributed agent framework for agent system
 (define (agent-system-enable-distributed-framework! agent-system)

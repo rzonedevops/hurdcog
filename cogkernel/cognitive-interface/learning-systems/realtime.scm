@@ -31,7 +31,7 @@
             monitor-learning-effectiveness
             enhanced-continuous-learning-loop
             *global-learning-system*
-            current-time))
+            current-time-seconds))
 
 ;;; Learning experience record
 (define-record-type <learning-experience>
@@ -65,8 +65,8 @@
   (experience-buffer learning-system-experience-buffer)
   (callbacks learning-system-callbacks set-learning-system-callbacks!))
 
-;;; Current time helper function
-(define (current-time)
+;;; Current time helper function  
+(define (current-time-seconds)
   "Get current time as number of seconds since epoch"
   (time-second (current-time time-utc)))
 
@@ -91,7 +91,7 @@
 ;;; Create learning experience
 (define (create-learning-experience context action outcome feedback)
   "Create a new learning experience record"
-  (make-learning-experience-record (gensym "exp") context action outcome feedback (current-time)))
+  (make-learning-experience-record (gensym "exp") context action outcome feedback (current-time-seconds)))
 
 ;;; Learn from experience
 (define (learn-from-experience learning-system experience)
@@ -250,7 +250,7 @@
       ; Process pending experiences
       (hash-for-each (lambda (id experience)
                       ; Reprocess old experiences for meta-learning
-                      (when (> (- (current-time) (learning-experience-timestamp experience)) 3600)
+                      (when (> (- (current-time-seconds) (learning-experience-timestamp experience)) 3600)
                         (meta-learn-from-experience learning-system experience)))
                     (learning-system-experience-buffer learning-system))
       
@@ -446,7 +446,7 @@
       
       ; Process pending experiences for meta-learning
       (hash-for-each (lambda (id experience)
-                      (when (> (- (current-time) (learning-experience-timestamp experience)) 3600)
+                      (when (> (- (current-time-seconds) (learning-experience-timestamp experience)) 3600)
                         (meta-learn-from-experience learning-system experience)))
                     (learning-system-experience-buffer learning-system))
       
