@@ -10,6 +10,7 @@
   #:use-module (cogkernel cognitive-interface distributed-agents protocol)
   #:use-module (cogkernel cognitive-interface workflow-engine processor)
   #:use-module (cogkernel cognitive-interface learning-systems realtime)
+  #:use-module (cogkernel cognitive-interface decision-making autonomous)
   #:use-module (ice-9 match)
   #:use-module (ice-9 threads)
   #:use-module (srfi srfi-1)
@@ -21,17 +22,20 @@
             register-cognitive-agent
             create-cognitive-workflow
             enable-cognitive-learning
+            autonomous-decision-making
+            execute-autonomous-decision
             get-interface-status
             shutdown-cognitive-interface
             *global-cognitive-interface*))
 
 ;;; Cognitive operations interface record
 (define-record-type <cognitive-operations-interface>
-  (make-cognitive-operations-interface-record agent-framework workflow-engine learning-system status config)
+  (make-cognitive-operations-interface-record agent-framework workflow-engine learning-system decision-system status config)
   cognitive-operations-interface?
   (agent-framework cognitive-operations-interface-agent-framework)
   (workflow-engine cognitive-operations-interface-workflow-engine)
   (learning-system cognitive-operations-interface-learning-system)
+  (decision-system cognitive-operations-interface-decision-system)
   (status cognitive-operations-interface-status set-cognitive-operations-interface-status!)
   (config cognitive-operations-interface-config))
 
@@ -53,7 +57,8 @@
                                               (parallel-processing 'kokkos)
                                               (jit-compilation 'compiler-explorer)
                                               (distributed-storage 'atomspace)
-                                              (learning-enabled #t))
+                                              (learning-enabled #t)
+                                              (autonomy-level 3))
   "Create a new cognitive operations interface with specified configuration"
   (let* ((config (make-cognitive-config-record parallel-processing jit-compilation 
                                                distributed-storage learning-enabled))
@@ -67,10 +72,12 @@
                              (make-learning-system #:pattern-learning #t
                                                   #:temporal-difference #t
                                                   #:reinforcement #t)
-                             #f)))
+                             #f))
+         (decision-system (make-autonomous-decision-system #:autonomy-level autonomy-level
+                                                          #:learning-system learning-system)))
     
     (make-cognitive-operations-interface-record agent-framework workflow-engine learning-system
-                                               'INITIALIZING config)))
+                                               decision-system 'INITIALIZING config)))
 
 ;;; Initialize cognitive interface
 (define (initialize-cognitive-interface interface)
@@ -123,6 +130,8 @@
      (apply execute-workflow-operation interface args))
     ('LEARNING-UPDATE
      (apply execute-learning-operation interface args))
+    ('AUTONOMOUS-DECISION
+     (apply execute-autonomous-decision-operation interface args))
     ('INTEGRATED-OPERATION
      (apply execute-integrated-operation interface args))
     (else
@@ -266,6 +275,28 @@
       ; This would require modifying the record, which is not directly supported
       ; In a real implementation, we'd use a mutable field or recreate the interface
       (format #t "Learning system enabled~%"))))
+
+;;; Execute autonomous decision operation
+(define (execute-autonomous-decision-operation interface situation options . optional-args)
+  "Execute autonomous decision making through the decision system"
+  (let* ((decision-system (cognitive-operations-interface-decision-system interface))
+         (urgency (if (pair? optional-args) (car optional-args) 'medium))
+         (context ((@ (cogkernel cognitive-interface decision-making autonomous) create-decision-context)
+                   situation options #:urgency urgency)))
+    
+    (format #t "Executing autonomous decision for situation: ~a~%" situation)
+    (autonomous-decide decision-system context)))
+
+;;; Autonomous decision making interface function
+(define (autonomous-decision-making interface situation options . optional-args)
+  "High-level autonomous decision making interface"
+  (apply execute-autonomous-decision-operation interface situation options optional-args))
+
+;;; Execute autonomous decision with context
+(define (execute-autonomous-decision interface context)
+  "Execute autonomous decision with pre-created context"
+  (let ((decision-system (cognitive-operations-interface-decision-system interface)))
+    (autonomous-decide decision-system context)))
 
 ;;; Handle workflow request message
 (define (handle-workflow-request interface message)
