@@ -71,40 +71,60 @@
         (format #t "   ✓ Cognitive workflow engine operational~%~%"))))
   
   ;; 3. Real-time Learning Systems Simulation
-  (format #t "3. Real-time Learning Systems:~%")
+  (format #t "3. Enhanced Real-time Learning Systems:~%")
   (let* ((atomspace (make-atomspace))
-         (attention-bank (make-attention-bank)))
+         (attention-bank (make-attention-bank))
+         (learning-system (make-learning-system #:pattern-learning #t
+                                               #:temporal-difference #t
+                                               #:reinforcement #t)))
     
-    ;; Create learning experiences
-    (let ((exp1 (make-atom 'EXPERIENCE "successful-optimization"))
-          (exp2 (make-atom 'EXPERIENCE "pattern-recognition"))
-          (exp3 (make-atom 'EXPERIENCE "adaptive-behavior")))
+    ;; Create diverse learning experiences
+    (let ((exp1 (create-learning-experience 'OPTIMIZATION-CONTEXT 'APPLY-KOKKOS 'PERFORMANCE-BOOST 'SUCCESS))
+          (exp2 (create-learning-experience 'PATTERN-DETECTION 'USE-PLN-REASONING 'PATTERN-FOUND 'SUCCESS))
+          (exp3 (create-learning-experience 'ERROR-HANDLING 'RETRY-OPERATION 'RECOVERY 'SUCCESS))
+          (exp4 (create-learning-experience 'RESOURCE-ALLOCATION 'ATTENTION-FOCUS 'EFFICIENCY-GAIN 'SUCCESS))
+          (exp5 (create-learning-experience 'DISTRIBUTED-TASK 'AGENT-COORDINATION 'TASK-COMPLETION 'PARTIAL)))
       
-      (atomspace-add! atomspace exp1)
-      (atomspace-add! atomspace exp2)
-      (atomspace-add! atomspace exp3)
+      ;; Process learning experiences
+      (for-each (lambda (exp)
+                  (learn-from-experience learning-system exp))
+                (list exp1 exp2 exp3 exp4 exp5))
       
-      ;; Create learning patterns
-      (let ((pattern1 (make-atom 'PATTERN "optimization-pattern"))
-            (pattern2 (make-atom 'PATTERN "recognition-pattern")))
-        
-        (atomspace-add! atomspace pattern1)
-        (atomspace-add! atomspace pattern2)
-        
-        ;; Link experiences to patterns
-        (let ((link1 (make-link 'SIMILARITY (list exp1 pattern1)))
-              (link2 (make-link 'SIMILARITY (list exp2 pattern2))))
-          (atomspace-add! atomspace link1)
-          (atomspace-add! atomspace link2)
-          
-          (format #t "   ✓ Learning pattern recognition established~%"))
-        
-        ;; Allocate attention to important patterns
-        (attention-bank-allocate! attention-bank pattern1 80)
-        (attention-bank-allocate! attention-bank pattern2 60)
-        
-        (format #t "   ✓ Attention-based learning prioritization active~%")
-        (format #t "   ✓ Real-time learning systems operational~%~%"))))
+      (format #t "   ✓ Processed ~a learning experiences~%" 5)
+      
+      ;; Test pattern recognition
+      (let ((patterns (pattern-recognition learning-system 'OPTIMIZATION-CONTEXT)))
+        (format #t "   ✓ Pattern recognition: ~a patterns found~%" (length patterns)))
+      
+      ;; Test advanced pattern learning
+      (let ((advanced-patterns (advanced-pattern-learning learning-system '() 0.6)))
+        (format #t "   ✓ Advanced pattern learning: ~a confident patterns~%" (length advanced-patterns)))
+      
+      ;; Test behavior adaptation
+      (let ((adapted-behavior (adapt-behavior learning-system 'ERROR-HANDLING)))
+        (format #t "   ✓ Behavior adaptation: ~a~%" adapted-behavior))
+      
+      ;; Test learning effectiveness
+      (let ((effectiveness (evaluate-learning-effectiveness learning-system)))
+        (format #t "   ✓ Learning effectiveness: ~a~%" effectiveness))
+      
+      ;; Test monitoring
+      (let ((monitor-results (monitor-learning-effectiveness learning-system)))
+        (format #t "   ✓ Learning monitoring: ~a~%" monitor-results))
+      
+      ;; Test experience replay
+      (experience-replay learning-system 3)
+      (format #t "   ✓ Experience replay completed~%")
+      
+      ;; Test temporal difference learning
+      (temporal-difference-learning learning-system exp1)
+      (format #t "   ✓ Temporal difference learning applied~%")
+      
+      ;; Test Q-learning
+      (q-learning-update learning-system 'OPTIMIZATION-STATE 'KOKKOS-ACTION 1.5 'SUCCESS-STATE)
+      (format #t "   ✓ Q-learning update completed~%")
+      
+      (format #t "   ✓ Enhanced real-time learning systems operational~%~%")))
   
   ;; 4. Integrated Cognitive Operations
   (format #t "4. Integrated Cognitive Operations:~%")

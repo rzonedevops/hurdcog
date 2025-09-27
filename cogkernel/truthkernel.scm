@@ -16,6 +16,10 @@
             truth-kernel-decide
             truth-kernel-infer
             truth-kernel-validate-system
+            truth-kernel-rules
+            truth-kernel-knowledge-base
+            truth-kernel-decision-cache
+            truth-kernel-system-state
             make-truth-value
             truth-value?
             truth-value-strength

@@ -39,7 +39,12 @@
     TASK
     AGENT
     RULE
-    SCRIPT))
+    SCRIPT
+    EXPERIENCE
+    PATTERN
+    STATE-VALUE
+    POLICY
+    META-PATTERN))
 
 ;;; Link types for hypergraph connections
 (define link-types
