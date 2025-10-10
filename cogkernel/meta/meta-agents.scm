@@ -72,12 +72,13 @@
     ((LEARNING) '(enhanced-experience-integration))
     (else '(general-improvement))))
 
-;;; System Audit Meta-Agent
+;;; System Audit Meta-Agent (Enhanced with Security)
 (define (audit-meta-agent system-state)
-  "Meta-agent that audits and validates system state"
-  (format #t "🔍 Audit Meta-Agent: Analyzing system integrity...~%")
+  "Meta-agent that audits and validates system state with security focus"
+  (format #t "🔍 Audit Meta-Agent: Analyzing system integrity and security...~%")
   (let ((issues '())
-        (strengths '()))
+        (strengths '())
+        (security-issues '()))
     
     ;; Check for potential issues
     (when (< (length system-state) 5)
@@ -86,14 +87,35 @@
     (when (not (member 'atomspace system-state))
       (set! issues (cons 'missing-memory-system issues)))
     
+    ;; Security-specific checks
+    (unless (member 'security-monitoring system-state)
+      (set! security-issues (cons 'missing-security-monitoring security-issues)))
+    
+    (unless (member 'encryption-enabled system-state)
+      (set! security-issues (cons 'encryption-not-enabled security-issues)))
+    
+    (unless (member 'access-control system-state)
+      (set! security-issues (cons 'missing-access-control security-issues)))
+    
+    (unless (member 'audit-logging system-state)
+      (set! security-issues (cons 'audit-logging-disabled security-issues)))
+    
     ;; Identify strengths
     (when (member 'cognitive-integration system-state)
       (set! strengths (cons 'strong-integration strengths)))
     
+    (when (member 'security-hardening system-state)
+      (set! strengths (cons 'security-hardened strengths)))
+    
+    (when (member 'capability-based-security system-state)
+      (set! strengths (cons 'advanced-security-model strengths)))
+    
     (format #t "  Issues found: ~a~%" issues)
+    (format #t "  Security issues: ~a~%" security-issues)
     (format #t "  Strengths identified: ~a~%" strengths)
     
-    (list 'audit-result issues strengths)))
+    ;; Return enhanced audit result
+    (list 'audit-result issues security-issues strengths)))
 
 ;;; Self-Repair Meta-Agent
 (define (self-repair-meta-agent issues)
