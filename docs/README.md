@@ -1,11 +1,21 @@
-# Documentation
+# HurdCog Documentation
 
-This directory contains comprehensive documentation for the GNU Hurd Cognitive Architecture project.
+This directory contains comprehensive documentation for **HurdCog**, the world's first cognitive AGI operating system based on OpenCog and GNU Hurd.
+
+## ⭐ Start Here: OpenCog AGI-OS Documentation
+
+**New to HurdCog?** These documents explain the revolutionary cognitive architecture:
+
+1. **[AGI OS Overview](AGI_OS_OVERVIEW.md)** - What is a cognitive AGI operating system?
+2. **[OpenCog Hurd Integration](OPENCOG_HURD_INTEGRATION.md)** - Technical architecture and implementation
+3. **[Cognitive Services API](COGNITIVE_SERVICES_API.md)** - Developer guide for building cognitive components
+4. **[Examples](../cogkernel/examples/)** - Working code demonstrating cognitive integration
 
 ## Overview
 
 The documentation is organized into several categories to serve different audiences and use cases:
 
+- **AGI-OS Documentation**: Understanding cognitive operating systems ⭐ **NEW**
 - **Architecture Documentation**: System design and technical architecture
 - **Development Documentation**: Guides for contributors and developers  
 - **Integration Documentation**: Component integration and build system
@@ -38,6 +48,12 @@ docs/
 
 ## Key Documentation Files
 
+### OpenCog AGI-OS (★ Essential Reading ★)
+- **[AGI_OS_OVERVIEW.md](AGI_OS_OVERVIEW.md)**: What is a cognitive AGI-OS?
+- **[OPENCOG_HURD_INTEGRATION.md](OPENCOG_HURD_INTEGRATION.md)**: Complete technical architecture
+- **[COGNITIVE_SERVICES_API.md](COGNITIVE_SERVICES_API.md)**: API reference for developers
+- **[../cogkernel/examples/](../cogkernel/examples/)**: Working examples
+
 ### Architecture and Design
 - **[ARCHITECTURE.md](ARCHITECTURE.md)**: Complete system architecture
 - **[BUILD.md](BUILD.md)**: Build system and compilation process
@@ -46,8 +62,10 @@ docs/
 ### Development
 - **[DEVELOPER.md](DEVELOPER.md)**: Developer setup and guidelines
 - **[open-issues/contributing.md](open-issues/contributing.md)**: Contribution guidelines
+- **[../CONTRIBUTING.md](../CONTRIBUTING.md)**: Main contribution guide
 
 ### Component Documentation
+- **[../cogkernel/README.md](../cogkernel/README.md)**: Cognitive kernel implementation
 - **[open-issues/hurd.md](open-issues/hurd.md)**: GNU Hurd specific documentation
 - **[open-issues/microkernel.md](open-issues/microkernel.md)**: Microkernel architecture
 - **[open-issues/glibc.md](open-issues/glibc.md)**: C library integration
@@ -79,31 +97,40 @@ The documentation serves multiple audiences:
 
 ## Getting Started
 
+### For Everyone: Learn About Cognitive AGI-OS
+Start with:
+1. **[AGI OS Overview](AGI_OS_OVERVIEW.md)** - What makes HurdCog revolutionary
+2. **[OpenCog Integration](OPENCOG_HURD_INTEGRATION.md)** - How it works
+3. [FAQ](open-issues/faq.md) - Common questions
+
 ### For Users
 Start with:
-1. [User Documentation](open-issues/user.md)
-2. [System Capabilities](open-issues/capabilities.md)
-3. [FAQ](open-issues/faq.md)
+1. **[AGI OS Overview](AGI_OS_OVERVIEW.md)** - Benefits and use cases
+2. [User Documentation](open-issues/user.md) - Using HurdCog
+3. [System Capabilities](open-issues/capabilities.md) - What it can do
 
 ### For Developers
 Start with:
-1. [Developer Guide](DEVELOPER.md)
-2. [Architecture Overview](ARCHITECTURE.md)
-3. [Contributing Guidelines](open-issues/contributing.md)
-4. [Build Documentation](BUILD.md)
+1. **[Cognitive Services API](COGNITIVE_SERVICES_API.md)** - Build cognitive components
+2. **[Examples](../cogkernel/examples/)** - Working code
+3. [Developer Guide](DEVELOPER.md) - Development setup
+4. [Architecture Overview](ARCHITECTURE.md) - System design
+5. [Contributing Guidelines](../CONTRIBUTING.md) - How to contribute
 
 ### For System Administrators
 Start with:
-1. [System Architecture](ARCHITECTURE.md)
-2. [Installation Guide](../INSTALL)
-3. [Build System](BUILD.md)
+1. **[OpenCog Integration](OPENCOG_HURD_INTEGRATION.md)** - Understanding the system
+2. [System Architecture](ARCHITECTURE.md) - Technical details
+3. [Installation Guide](../INSTALL) - Deployment
+4. [Build System](BUILD.md) - Building from source
 
 ### For Researchers
 Start with:
-1. [Architecture Documentation](ARCHITECTURE.md)
-2. [Microkernel Design](open-issues/microkernel.md)
-3. [Technical Advantages](open-issues/advantages.md)
-4. [Current Challenges](open-issues/challenges.md)
+1. **[AGI OS Overview](AGI_OS_OVERVIEW.md)** - Novel cognitive OS paradigm
+2. **[OpenCog Integration](OPENCOG_HURD_INTEGRATION.md)** - Implementation details
+3. [Architecture Documentation](ARCHITECTURE.md) - System architecture
+4. [Microkernel Design](open-issues/microkernel.md) - Microkernel aspects
+5. [Technical Advantages](open-issues/advantages.md) - Research opportunities
 
 ## Maintenance
 

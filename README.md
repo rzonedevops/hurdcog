@@ -1,23 +1,40 @@
-# GNU Hurd Cognitive Architecture
+# HurdCog: OpenCog-Powered GNU Hurd Cognitive AGI-OS
 
-**Project:** GNU Hurd Cognitive Microkernel Operating System  
+**Project:** HurdCog - The World's First Cognitive AGI Operating System  
 **Version:** 2.0 - Production Ready  
 **Status:** Phase 5 Complete ✅
 
 ## Overview
 
-This repository represents the world's first cognitive microkernel operating system, integrating GNU Hurd's modular architecture with advanced cognitive computing frameworks. The project successfully implements a complete SKZ Integration Strategy across 5 phases, solving 350+ open GNU Hurd issues through intelligent, self-optimizing system components.
+**HurdCog** represents a fundamental breakthrough in operating system design: the integration of OpenCog's AGI framework with GNU Hurd's microkernel architecture to create the world's first **cognitive AGI operating system**.
+
+Unlike traditional operating systems that execute fixed algorithms, HurdCog **learns**, **reasons**, and **adapts**. The system continuously improves its performance, predicts problems before they occur, and optimizes itself based on learned patterns.
 
 **🎉 ALL PHASES COMPLETE - PRODUCTION READY**
 
+## What Makes HurdCog Different?
+
+**Traditional OS:**
+- Fixed algorithms
+- Manual configuration
+- Reactive to problems
+- Static behavior
+
+**HurdCog AGI-OS:**
+- Learning algorithms (OpenCog AtomSpace)
+- Self-configuration (PLN reasoning)
+- Predictive adaptation (Pattern mining)
+- Continuous evolution (ECAN attention)
+
 ## Core Vision
 
-Transform GNU Hurd from a traditional microkernel OS into a cognitive operating system that can:
-- **Self-diagnose** and **self-heal** system issues
-- **Optimize performance** through machine learning
-- **Adapt** to changing workloads and hardware
-- **Learn** from system behavior patterns
-- **Coordinate** distributed resources intelligently
+Transform GNU Hurd from a traditional microkernel OS into a **cognitive AGI operating system** that:
+- **Learns** from experience and improves over time
+- **Reasons** about problems using probabilistic logic
+- **Predicts** future needs and optimizes proactively
+- **Self-diagnoses** and **self-heals** system issues
+- **Adapts** continuously to changing conditions
+- **Explains** its decisions and actions
 
 ## Repository Structure
 
@@ -39,10 +56,13 @@ Transform GNU Hurd from a traditional microkernel OS into a cognitive operating 
 - **GNU Mach**: Microkernel providing core system services
 - **MIG**: Interface generator for IPC
 
-### Cognitive Architecture
-- **OpenCog**: Artificial General Intelligence framework
-- **AtomSpace**: Hypergraph database for knowledge representation
-- **CogServer**: Distributed cognitive processing
+### Cognitive Architecture (OpenCog AGI)
+- **OpenCog**: Artificial General Intelligence framework - **THE CORE** of HurdCog
+- **AtomSpace**: Hypergraph knowledge base storing all system state, patterns, and policies
+- **PLN**: Probabilistic Logic Networks for reasoning under uncertainty
+- **ECAN**: Economic Attention Network for resource allocation
+- **Pattern Mining**: Learns patterns from system operation
+- **CogServer**: Distributed cognitive processing across the system
 
 ### Distributed Systems
 - **Plan9**: Distributed operating system with 9P protocol
@@ -115,37 +135,121 @@ Transform GNU Hurd from a traditional microkernel OS into a cognitive operating 
 
 **🎯 PROJECT STATUS: PRODUCTION READY**
 
+## OpenCog as the Cognitive Core
+
+HurdCog implements **OpenCog as the central nervous system** of the operating system. Every system operation is mediated through cognitive services:
+
+### How It Works
+
+```
+Application Request
+       ↓
+Cognitive Services Layer (learns, reasons, optimizes)
+       ↓
+OpenCog AtomSpace (stores knowledge, patterns, state)
+       ↓
+GNU Hurd Microkernel (executes decisions)
+       ↓
+Hardware
+```
+
+### Key Cognitive Capabilities
+
+1. **Cognitive Process Management**: Learns process behavior, predicts resource needs
+2. **Cognitive Memory Management**: Predicts page access, optimizes allocation
+3. **Cognitive IPC Routing**: Learns communication patterns, optimizes routing
+4. **Self-Healing**: Diagnoses problems and applies fixes automatically
+5. **Predictive Optimization**: Anticipates needs and optimizes proactively
+
+### Example: The System Learns
+
+```scheme
+;; Day 1: System observes your workflow
+(record-event "compile" "9:15 AM" "cpu: 80%")
+(record-event "test" "9:17 AM" "disk: high")
+
+;; Day 3: System learns the pattern
+(learned-pattern
+  "morning-development-cycle"
+  "compile -> test every 2 minutes"
+  confidence: 0.85)
+
+;; Day 5: System optimizes proactively
+(predict "compile-starting" "9:15 AM")
+(optimize "pre-allocate memory" "keep compiler in RAM")
+(result "40% faster compile time")
+```
+
 ## Getting Started
 
-### Prerequisites
-- GCC configured for i686-gnu target
-- GNU Make and Autotools
-- Git for development
+### For Users - Experience Cognitive Computing
 
-### Building
+```bash
+# Boot HurdCog with cognitive features enabled
+grub> boot /boot/gnumach -- /hurd/startup --cognitive
+
+# Your system will now:
+# - Learn your usage patterns
+# - Optimize itself automatically
+# - Predict and prevent problems
+# - Explain its decisions
+```
+
+### For Developers - Build Cognitive Components
+
+```c
+#include <cogkernel/hurd-atomspace-bridge.h>
+
+int main() {
+    // Initialize cognitive interface
+    hurd_cognitive_init();
+    hurd_cognitive_register("my-server");
+    
+    // Your server is now cognitive-aware!
+    // It can learn, reason, and adapt
+    
+    // Report events to learn from
+    hurd_cognitive_add_event(&event);
+    
+    // Query for optimization suggestions
+    hurd_cognitive_get_optimization(&opt);
+}
+```
+
+See the [Cognitive Services API Guide](docs/COGNITIVE_SERVICES_API.md) for details.
+
+### Building from Source
+
 ```bash
 # Configure the build
-./configure --host=i686-gnu
+./configure --host=i686-gnu --enable-cognitive
 
 # Build the complete system
 make
 
-# Build and test Kokkos integration (Phase 2)
-make kokkos-demo
-make kokkos-test
+# Build cognitive kernel components
+make cogkernel
+
+# Test cognitive integration
+make hurdcog-bootstrap
+make cognitive-test
+
+# Build examples
+cd cogkernel/examples
+make
 
 # Install (requires proper Hurd environment)
 make install
 ```
 
-### Testing Kokkos Integration
-```bash
-# Run interactive demonstration
-cd performance/kokkos-integration
-./kokkos-hurd-demo --demo
+### Running Examples
 
-# Run complete test suite
-./kokkos-hurd-demo --test
+```bash
+# Simple cognitive server demonstration
+cd cogkernel/examples
+./simple-cognitive-server
+
+# Watch the system learn and optimize itself!
 ```
 
 ## Contributing
@@ -172,11 +276,17 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## Resources
 
+### OpenCog AGI-OS Documentation (★ START HERE ★)
+- **AGI-OS Overview**: [docs/AGI_OS_OVERVIEW.md](docs/AGI_OS_OVERVIEW.md) - **What is a cognitive AGI-OS?**
+- **OpenCog Integration**: [docs/OPENCOG_HURD_INTEGRATION.md](docs/OPENCOG_HURD_INTEGRATION.md) - **Technical architecture**
+- **Cognitive Services API**: [docs/COGNITIVE_SERVICES_API.md](docs/COGNITIVE_SERVICES_API.md) - **Developer guide**
+- **Examples**: [cogkernel/examples/](cogkernel/examples/) - **Working code examples**
+
 ### Project Documentation
 - **Documentation Index**: [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) - Complete documentation navigation
 - **SKZ Integration Strategy**: [SKZ_INTEGRATION_STRATEGY.md](SKZ_INTEGRATION_STRATEGY.md) - Complete integration strategy
 - **Development Roadmap**: [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) - Project roadmap and phases
-- **Architecture Overview**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System architecture
+- **Hurd Architecture**: [HURD_ARCHITECTURE.md](HURD_ARCHITECTURE.md) - Hurd system architecture
 - **Contributing Guide**: [CONTRIBUTING.md](CONTRIBUTING.md) - Comprehensive developer guide
 
 ### Phase Documentation
