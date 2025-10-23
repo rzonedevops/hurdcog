@@ -405,6 +405,6 @@
     
     (format #t "~%=== TEST SUITE COMPLETED ===~%")
     (format #t "Cognitive System Integrity: ~a~%"
-            (if integrity-verified? "✅ VERIFIED" "❌ COMPROMISED"))
+            (if integrity-verified? "✅ VERIFIED" "❌ COMPROMISED")))))
     
     integrity-verified?))
