@@ -159,6 +159,11 @@ phase1-test: cognitive-primitives.scm scheme-adapters.scm test-patterns.scm hype
 	@echo "=== Phase 1 OpenCog-GNUHurd Integration Test ==="
 	@guile -s phase1-integration.scm
 
+# Phase 1 comprehensive test (production-ready, no compilation needed)
+phase1-comprehensive-test: cognitive-primitives.scm scheme-adapters.scm
+	@echo "=== Phase 1 Comprehensive Integration Test ==="
+	@GUILE_AUTO_COMPILE=0 guile -L . standalone-phase1-comprehensive-test.scm
+
 # Phase 2 Core Services Tests
 phase2-test: phase2-standalone-test.scm
 	@echo "=== Phase 2 Core Services Integration Test ==="
