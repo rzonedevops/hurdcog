@@ -30,8 +30,11 @@ SHARED_LIBRARY = libcognitive_kernels.so
 # Test executable
 TEST_EXEC = test_cognitive_kernels
 
+# Benchmark executable
+BENCHMARK_EXEC = benchmark_cognitive_kernels
+
 # Default target
-all: $(LIBRARY) $(SHARED_LIBRARY) $(TEST_EXEC)
+all: $(LIBRARY) $(SHARED_LIBRARY) $(TEST_EXEC) $(BENCHMARK_EXEC)
 
 # Build static library
 $(LIBRARY): $(OBJECTS)
@@ -48,6 +51,11 @@ $(TEST_EXEC): test_cognitive_kernels.o $(OBJECTS)
 	@echo "Building test executable: $@"
 	$(CC) -o $@ $^ $(LDFLAGS)
 
+# Build benchmark executable
+$(BENCHMARK_EXEC): benchmark_cognitive_kernels.o $(OBJECTS)
+	@echo "Building benchmark executable: $@"
+	$(CC) -o $@ $^ $(LDFLAGS)
+
 # Compile source files
 %.o: %.c $(HEADERS)
 	@echo "Compiling: $<"
@@ -61,18 +69,18 @@ test: $(TEST_EXEC)
 	./$(TEST_EXEC)
 
 # Performance benchmark
-benchmark: $(TEST_EXEC)
+benchmark: $(BENCHMARK_EXEC)
 	@echo ""
 	@echo "Running performance benchmarks..."
 	@echo ""
-	./$(TEST_EXEC) --benchmark
+	./$(BENCHMARK_EXEC)
 
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	rm -f $(OBJECTS) test_cognitive_kernels.o
+	rm -f $(OBJECTS) test_cognitive_kernels.o benchmark_cognitive_kernels.o
 	rm -f $(LIBRARY) $(SHARED_LIBRARY)
-	rm -f $(TEST_EXEC)
+	rm -f $(TEST_EXEC) $(BENCHMARK_EXEC)
 
 # Install headers and library
 install: $(LIBRARY) $(SHARED_LIBRARY)
