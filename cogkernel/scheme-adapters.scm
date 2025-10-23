@@ -45,13 +45,13 @@
   (hash-set! *gnumach-primitive-registry* name
              `((properties . ,properties)
                (grammar-rule . ,grammar-rule)
-               (timestamp . ,(current-time)))))
+               (timestamp . ,(get-timestamp)))))
 
 ;;; Create translation adapter
 (define (make-translation-adapter name from-type to-type translator validator)
   "Create a bidirectional translation adapter"
   (make-translation-adapter-record name from-type to-type translator validator
-                                   `((created . ,(current-time))
+                                   `((created . ,(get-timestamp))
                                      (translations . 0)
                                      (errors . 0))))
 
@@ -59,7 +59,7 @@
 (define (adapter-translate-to-atomspace adapter primitive)
   "Translate a GNUMach primitive to AtomSpace representation using adapter"
   (match primitive
-    ((primitive-name . properties)
+    ((primitive-name properties)
      (let* ((registry-entry (hash-ref *gnumach-primitive-registry* primitive-name))
             (translator (adapter-translator adapter)))
        (if registry-entry
@@ -105,46 +105,46 @@
 (define (create-cognitive-grammar)
   "Create cognitive grammar rules for GNUMach-AtomSpace translation"
   (set! *cognitive-grammar-rules*
-    `(;; IPC Primitives
-      (PORT_ALLOCATE 
-       (pattern . (lambda (name props rule)
+    (list ;; IPC Primitives
+      (list 'PORT_ALLOCATE 
+       (cons 'pattern (lambda (name props rule)
                     (encode-gnumach-primitive name props)))
-       (inverse . (lambda (atoms)
+       (cons 'inverse (lambda (atoms)
                     (decode-atomspace-to-primitive atoms 'PORT_ALLOCATE))))
       
       ;; Memory Management  
-      (VM_ALLOCATE
-       (pattern . (lambda (name props rule)
+      (list 'VM_ALLOCATE
+       (cons 'pattern (lambda (name props rule)
                     (encode-gnumach-primitive name props)))
-       (inverse . (lambda (atoms)
+       (cons 'inverse (lambda (atoms)
                     (decode-atomspace-to-primitive atoms 'VM_ALLOCATE))))
       
       ;; File System Operations
-      (FILE_OPEN
-       (pattern . (lambda (name props rule)
+      (list 'FILE_OPEN
+       (cons 'pattern (lambda (name props rule)
                     (encode-gnumach-primitive name props)))
-       (inverse . (lambda (atoms)
+       (cons 'inverse (lambda (atoms)
                     (decode-atomspace-to-primitive atoms 'FILE_OPEN))))
       
       ;; Thread Management
-      (THREAD_CREATE
-       (pattern . (lambda (name props rule)
+      (list 'THREAD_CREATE
+       (cons 'pattern (lambda (name props rule)
                     (encode-gnumach-primitive name props)))
-       (inverse . (lambda (atoms)
+       (cons 'inverse (lambda (atoms)
                     (decode-atomspace-to-primitive atoms 'THREAD_CREATE))))
       
       ;; Network Operations
-      (NETWORK_SEND
-       (pattern . (lambda (name props rule)
+      (list 'NETWORK_SEND
+       (cons 'pattern (lambda (name props rule)
                     (encode-gnumach-primitive name props)))
-       (inverse . (lambda (atoms)
+       (cons 'inverse (lambda (atoms)
                     (decode-atomspace-to-primitive atoms 'NETWORK_SEND))))
       
       ;; Signal Handling
-      (SIGNAL_POST
-       (pattern . (lambda (name props rule)
+      (list 'SIGNAL_POST
+       (cons 'pattern (lambda (name props rule)
                     (encode-gnumach-primitive name props)))
-       (inverse . (lambda (atoms)
+       (cons 'inverse (lambda (atoms)
                     (decode-atomspace-to-primitive atoms 'SIGNAL_POST)))))))
 
 ;;; Decode AtomSpace atoms back to primitive

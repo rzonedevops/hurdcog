@@ -31,7 +31,7 @@
   (set! *test-results* 
         (cons `((test . ,test-name)
                 (result . ,result)
-                (timestamp . ,(current-time)))
+                (timestamp . ,(get-timestamp)))
               *test-results*)))
 
 ;;; Test primitive encoding with tensor shapes

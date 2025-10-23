@@ -25,7 +25,7 @@
   (set! *phase1-results*
         (cons `((component . ,component)
                 (result . ,result)
-                (timestamp . ,(current-time)))
+                (timestamp . ,(get-timestamp)))
               *phase1-results*)))
 
 ;;; Run complete Phase 1 integration test
