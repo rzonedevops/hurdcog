@@ -36,7 +36,34 @@ This implementation fulfills the Spin Cycle 1 requirements:
    - **Trust Confusion** → Trust binding through capability rings
    - **Resource Blindness** → Resource tracking through ECAN allocation
 
-### Quick Start
+## 🧬 Master Control Dashboard
+
+**NEW:** Real-time monitoring and management interface for the Cognitive Fusion Reactor!
+
+### Quick Start Dashboard
+
+```bash
+# Start the Master Control Dashboard
+cd cogkernel
+./start-dashboard.sh
+
+# Or manually:
+python3 fusion-reactor-server.py
+```
+
+Then open your browser to: **http://localhost:8080/dashboard**
+
+The dashboard provides:
+- 📊 Real-time metrics monitoring (AtomSpace, ECAN, Neural-Symbolic, etc.)
+- ⚡ Phase implementation status tracking (all 6 phases)
+- 🧮 5D cognitive tensor visualization
+- 📜 Live system event log
+- 🎛️ Interactive controls (refresh, diagnostics, reports)
+- 🔌 REST API for programmatic access
+
+**See [MASTER_CONTROL_DASHBOARD.md](MASTER_CONTROL_DASHBOARD.md) for complete documentation.**
+
+### Quick Start - Cognitive Kernel
 
 From the main GNU Hurd directory:
 

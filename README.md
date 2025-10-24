@@ -12,6 +12,28 @@ Unlike traditional operating systems that execute fixed algorithms, HurdCog **le
 
 **🎉 ALL PHASES COMPLETE - PRODUCTION READY WITH RIGOROUS TESTING**
 
+## 🧬 NEW: Master Control Dashboard
+
+**Real-time monitoring and management interface for the Cognitive Fusion Reactor!**
+
+```bash
+# Quick Start - Launch the dashboard
+cd cogkernel
+./start-dashboard.sh
+```
+
+**Access:** http://localhost:8080/dashboard
+
+**Features:**
+- 📊 Real-time metrics monitoring (AtomSpace, ECAN, Neural-Symbolic, Distributed Mesh, Meta-Cognition)
+- ⚡ All 6 phase implementation status tracking
+- 🧮 5D cognitive tensor visualization
+- 📜 Live system event log
+- 🎛️ Interactive controls (refresh, diagnostics, reports)
+- 🔌 REST API for programmatic access
+
+**See:** [FUSION_REACTOR_QUICK_START.md](FUSION_REACTOR_QUICK_START.md) | [cogkernel/MASTER_CONTROL_DASHBOARD.md](cogkernel/MASTER_CONTROL_DASHBOARD.md)
+
 ## What Makes HurdCog Different?
 
 **Traditional OS:**
