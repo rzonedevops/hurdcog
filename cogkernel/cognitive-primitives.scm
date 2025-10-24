@@ -22,7 +22,13 @@
             cognitive-tensor-shape
             *cognitive-modalities*
             *cognitive-contexts*
-            test-round-trip-translation))
+            test-round-trip-translation
+            get-timestamp))
+
+;;; Helper function for timestamps
+(define (get-timestamp)
+  "Get current timestamp as a number"
+  (get-internal-real-time))
 
 ;;; Cognitive fragment record combining tensor and hypergraph representations
 (define-record-type <cognitive-fragment>
@@ -70,7 +76,7 @@
                                       (context . ,context) 
                                       (salience . ,salience)
                                       (autonomy . ,autonomy-index)
-                                      (timestamp . ,(current-time))))))
+                                      (timestamp . ,(get-timestamp))))))
 
 ;;; Create tensor data for cognitive encoding
 (define (create-cognitive-tensor-data modality depth context salience autonomy-index)
