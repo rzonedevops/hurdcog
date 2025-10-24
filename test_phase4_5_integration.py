@@ -29,6 +29,7 @@ class Colors:
     FAIL = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def print_header(text: str):
     """Print a formatted header"""
@@ -56,8 +57,8 @@ def test_phase4_microservices():
     """Test Phase 4: Microservices and Load Balancing"""
     print_header("Phase 4: Load Balancing & Microservices Tests")
     
-    tests_passed = 0
     total_tests = 5
+    tests_passed = 0
     
     # Test 1: Microservice Discovery
     print_info("Test 1: Microservice Discovery")
@@ -90,14 +91,14 @@ def test_phase4_microservices():
     tests_passed += 1
     
     print(f"\n{Colors.BOLD}Phase 4 Results: {tests_passed}/{total_tests} tests passed{Colors.ENDC}")
-    return tests_passed == total_tests
+    return tests_passed == total_tests, total_tests
 
 def test_phase5_trading():
     """Test Phase 5: Algorithmic Trading and Backtesting"""
     print_header("Phase 5: Algorithmic Trading & Backtesting Tests")
     
-    tests_passed = 0
     total_tests = 6
+    tests_passed = 0
     
     # Test 1: Strategy Engine
     print_info("Test 1: Trading Strategy Engine")
@@ -136,14 +137,14 @@ def test_phase5_trading():
     tests_passed += 1
     
     print(f"\n{Colors.BOLD}Phase 5 Results: {tests_passed}/{total_tests} tests passed{Colors.ENDC}")
-    return tests_passed == total_tests
+    return tests_passed == total_tests, total_tests
 
 def test_integration():
     """Test integration between Phase 4 and Phase 5"""
     print_header("Phase 4/5 Integration Tests")
     
-    tests_passed = 0
     total_tests = 4
+    tests_passed = 0
     
     # Test 1: Microservice to Trading Integration
     print_info("Test 1: Microservice to Trading Strategy Communication")
@@ -170,26 +171,27 @@ def test_integration():
     tests_passed += 1
     
     print(f"\n{Colors.BOLD}Integration Results: {tests_passed}/{total_tests} tests passed{Colors.ENDC}")
-    return tests_passed == total_tests
+    return tests_passed == total_tests, total_tests
 
-def generate_test_report(phase4_passed: bool, phase5_passed: bool, integration_passed: bool):
+def generate_test_report(phase4_passed: bool, phase5_passed: bool, integration_passed: bool,
+                         phase4_total: int, phase5_total: int, integration_total: int):
     """Generate a test report"""
     report = {
         "test_run_timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "phase4_microservices": {
             "status": "PASSED" if phase4_passed else "FAILED",
-            "tests_total": 5,
-            "tests_passed": 5 if phase4_passed else 0
+            "tests_total": phase4_total,
+            "tests_passed": phase4_total if phase4_passed else 0
         },
         "phase5_trading": {
             "status": "PASSED" if phase5_passed else "FAILED",
-            "tests_total": 6,
-            "tests_passed": 6 if phase5_passed else 0
+            "tests_total": phase5_total,
+            "tests_passed": phase5_total if phase5_passed else 0
         },
         "integration": {
             "status": "PASSED" if integration_passed else "FAILED",
-            "tests_total": 4,
-            "tests_passed": 4 if integration_passed else 0
+            "tests_total": integration_total,
+            "tests_passed": integration_total if integration_passed else 0
         },
         "overall_status": "PASSED" if (phase4_passed and phase5_passed and integration_passed) else "FAILED"
     }
@@ -201,16 +203,17 @@ def main():
     print_header("🚀 Phase 4/5 Integration Test Suite 🚀")
     
     # Run Phase 4 tests
-    phase4_passed = test_phase4_microservices()
+    phase4_passed, phase4_total = test_phase4_microservices()
     
     # Run Phase 5 tests
-    phase5_passed = test_phase5_trading()
+    phase5_passed, phase5_total = test_phase5_trading()
     
     # Run integration tests
-    integration_passed = test_integration()
+    integration_passed, integration_total = test_integration()
     
     # Generate report
-    report = generate_test_report(phase4_passed, phase5_passed, integration_passed)
+    report = generate_test_report(phase4_passed, phase5_passed, integration_passed,
+                                  phase4_total, phase5_total, integration_total)
     
     # Print summary
     print_header("Test Summary")
