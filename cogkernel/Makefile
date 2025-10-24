@@ -13,6 +13,11 @@ BRIDGE_LIB = libhurd-atomspace-bridge.so
 BRIDGE_SOURCES = hurd-atomspace-bridge.c
 BRIDGE_HEADERS = hurd-atomspace-bridge.h
 
+# C library for ECAN resource management integration
+ECAN_LIB = libhurd-ecan.so
+ECAN_SOURCES = hurd-ecan-integration.c
+ECAN_HEADERS = hurd-ecan-integration.h
+
 # Guile modules for the cognitive kernel
 GUILE_MODULES = atomspace/atomspace.scm \
                agents/agents.scm \
@@ -239,6 +244,21 @@ $(BRIDGE_LIB): $(BRIDGE_SOURCES) $(BRIDGE_HEADERS)
 	fi
 	@echo "✅ Bridge library built successfully"
 
+# Build ECAN resource management library
+$(ECAN_LIB): $(ECAN_SOURCES) $(ECAN_HEADERS)
+	@echo "=== Building ECAN Resource Management Library ==="
+	@if [ -f /usr/include/mach/mach.h ]; then \
+		echo "Building with real Hurd headers"; \
+		gcc -shared -fPIC -o $(ECAN_LIB) $(ECAN_SOURCES) \
+			-I../include -I../hurd \
+			-lmach -lpthread; \
+	else \
+		echo "Building stub version for non-Hurd systems"; \
+		gcc -shared -fPIC -o $(ECAN_LIB) $(ECAN_SOURCES) \
+			-I. -lpthread; \
+	fi
+	@echo "✅ ECAN library built successfully"
+
 # Test microkernel integration
 test-microkernel-integration: $(BRIDGE_LIB) microkernel-integration.scm
 	@echo "=== Testing Microkernel Integration - Phase 2 ==="
@@ -255,14 +275,14 @@ phase2-microkernel-demo: $(BRIDGE_LIB)
 	@export LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH && \
 	 guile -s standalone-microkernel-test.scm
 
-# Build all targets including C library
-all: check-guile $(BRIDGE_LIB) compile-modules
+# Build all targets including C libraries
+all: check-guile $(BRIDGE_LIB) $(ECAN_LIB) compile-modules
 
-# Clean including C library
+# Clean including C libraries
 clean:
 	@echo "Cleaning cognitive kernel..."
 	@rm -rf compiled
-	@rm -f $(BRIDGE_LIB)
+	@rm -f $(BRIDGE_LIB) $(ECAN_LIB)
 	@find . -name "*.go" -delete
 	@find . -name "*~" -delete
 
